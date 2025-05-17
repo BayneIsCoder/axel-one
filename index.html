@@ -105,12 +105,12 @@
 
     function getRandomCard() {
       const roll = Math.random();
-      if (roll < 0.25) return "2"; // 25% chance for 2
-      if (roll < 0.5) return "1"; // 25%
-      if (roll < 0.75) return "3"; // 25%
-      if (roll < 0.85) return "blank"; // 10%
-      if (roll < 0.95) return "swap";  // 10%
-      return "slap";                   // 5%
+      if (roll < 0.2) return "2"; // 20% chance for 2
+      if (roll < 0.5) return "1"; // 30%
+      if (roll < 0.8) return "3"; // 30%
+      if (roll < 0.9) return "blank"; // 10%
+      if (roll < 0.97) return "swap";  // 7%
+      return "slap";                   // 3%
     }
 
     function drawInitialCards() {
@@ -277,10 +277,16 @@
       setTimeout(() => {
         document.getElementById("overlay").style.display = "none";
         drawInitialCards();
-        computerMove(); // Axilian goes first
+        const first = Math.floor(Math.random() * 2) + 1;
+        if (first === 2) {
+          log("Axilian goes first.");
+          computerMove();
+        } else {
+          log("You go first.");
+        }
       }, 5000);
     };
   </script>
-  <p>v. 2.0.0</p>
+  <p>v. 2.1.0</p>
 </body>
 </html>
