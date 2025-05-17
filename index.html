@@ -141,6 +141,8 @@
       }
       if (computerCards.length === 0) {
         document.body.innerHTML = '<h1>Axilian used all their cards. You Lose!! 💀🚡🪑</h1>';
+        document.body.classList.add('flash-red');
+        document.getElementById("deathSound").play();
         setTimeout(() => location.reload(), 5000);
         return true;
       }
@@ -214,9 +216,9 @@
     }
 
     function endGameLoss() {
+      document.body.innerHTML = '<h1>You have no valid cards left. Game over. 💀</h1>';
       document.body.classList.add('flash-red');
       document.getElementById("deathSound").play();
-      document.body.innerHTML = '<h1>You have no valid cards left. Game over. 💀</h1>';
       setTimeout(() => location.reload(), 5000);
     }
 
@@ -259,6 +261,6 @@
 
     setTimeout(beginGame, 5000);
   </script>
-  <p>v1.0.0 BETA</p>
+  <p>v1.0.1 BETA</p>
 </body>
 </html>
