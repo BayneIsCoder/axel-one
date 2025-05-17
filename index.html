@@ -79,7 +79,7 @@
       min-width: 50px;
     }
     #countdown {
-      font-size: 32px;
+      font-size: 28px;
       font-weight: bold;
       margin-top: 200px;
     }
@@ -87,14 +87,14 @@
 </head>
 <body>
 
-  <div id="countdown">Game begins in 5...</div>
+  <div id="countdown">Matching with a random Axilian... please wait...</div>
 
   <div id="gameContainer">
     <h1>Axel-One: Web Edition</h1>
     <p><strong>Your Hand:</strong></p>
     <div class="hand" id="playerHand"></div>
 
-    <p><strong id="computerHandTitle" style="display:none">Computer's Hand:</strong></p>
+    <p><strong id="computerHandTitle" style="display:none">Axilian's Hand:</strong></p>
     <div class="hand" id="computerHand" style="display:none"></div>
 
     <div id="slapArea" style="display:none">
@@ -198,7 +198,7 @@
         return true;
       }
       if (computerCards.length === 0) {
-        log("Computer used all their cards. Computer wins! 💀");
+        log("Axilian used all their cards. You lose! 💀");
         endGame();
         return true;
       }
@@ -209,7 +209,7 @@
         return true;
       }
       if (!hasPlayableCard(computerCards)) {
-        log("Computer has no valid cards left to play. You win! 🎉");
+        log("Axilian has no valid cards left to play. You win! 🎉");
         endGame();
         return true;
       }
@@ -271,7 +271,7 @@
       const valid = validResponses(lastCard);
       const playableCards = computerCards.filter(card => valid.includes(card));
       if (playableCards.length === 0) {
-        log('Computer has no valid cards left to play. You win! 🎉');
+        log('Axilian has no valid cards left to play. You win! 🎉');
         endGame();
         return;
       }
@@ -290,7 +290,7 @@
 
       const index = computerCards.indexOf(card);
       computerCards.splice(index, 1);
-      log(`Computer played: ${card}`);
+      log(`Axilian played: ${card}`);
       lastCard = card;
 
       if (checkWinLoseCondition()) return;
@@ -317,11 +317,7 @@
       log('SLAP battle begins! Click SLAP quickly!');
 
       slapTimeout = setTimeout(() => {
-        if (fromComputer) {
-          handleSlap('computer');
-        } else {
-          handleSlap('computer');
-        }
+        handleSlap('axilian');
       }, 1000);
 
       updatePlayerHand();
@@ -335,10 +331,10 @@
       document.getElementById('slapArea').style.display = 'none';
 
       if (who === 'player') {
-        log('You slapped first! Computer draws a card from the bottom.');
+        log('You slapped first! Axilian draws a card from the bottom.');
         computerCards.push(getRandomCard());
       } else {
-        log('Computer slapped first! You draw a card from the bottom.');
+        log('Axilian slapped first! You draw a card from the bottom.');
         playerCards.push(getRandomCard());
       }
       updatePlayerHand();
@@ -353,7 +349,7 @@
       let time = 5;
       const interval = setInterval(() => {
         if (time > 1) {
-          countdown.textContent = `Game begins in ${--time}...`;
+          time--;
         } else {
           clearInterval(interval);
           countdown.style.display = "none";
@@ -365,7 +361,6 @@
 
     window.onload = startCountdown;
   </script>
-  <p>1.1.0</p>
+  <p>1.2.0</p>
 </body>
 </html>
-
