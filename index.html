@@ -128,7 +128,10 @@
         return true;
       }
       if (computerCards.length === 0) {
-        document.body.innerHTML = '<h1>Axilian used all their cards. You win! 🎉</h1>';
+        document.body.innerHTML = '<h1>Axilian used all their cards. you died.</h1>';
+        document.body.classList.add('flash-red');
+        document.getElementById("deathSound").play();
+        document.body.classList.add('flash-red');
         setTimeout(() => location.reload(), 5000);
         return true;
       }
@@ -173,8 +176,6 @@
       const playable = computerCards.find(card => valid.includes(card) && card !== lastPlayerCard);
       console.log("Axilian cards:", computerCards);
       if (!playable) {
-        document.body.classList.add('flash-red');
-        document.getElementById("deathSound").play();
         document.body.innerHTML = '<h1>Axilian has no valid cards left. You win! 🎉</h1>';
         setTimeout(() => location.reload(), 5000);
         return;
@@ -204,15 +205,17 @@
     }
 
     function endGameLoss() {
+      document.body.innerHTML = '<h1>You have no valid cards left. you died. 💀</h1>';
       document.body.classList.add('flash-red');
       document.getElementById("deathSound").play();
-      document.body.innerHTML = '<h1>You have no valid cards left. Game over. 💀</h1>';
+      document.body.classList.add('flash-red');
       setTimeout(() => location.reload(), 5000);
     }
 
     function startSlapBattle(fromComputer = false) {
       document.getElementById('slapArea').style.display = 'block';
       log('SLAP battle begins! Click SLAP quickly!');
+      document.body.classList.add('flash-red');
 
       if (fromComputer) {
         slapTimeout = setTimeout(() => handleSlap('axilian'), 1000);
@@ -229,6 +232,7 @@
       } else {
         log('Axilian slapped first! You draw a card.');
         playerCards.push(getRandomCard());
+        document.body.classList.add('flash-red');
       }
       updatePlayerHand();
       document.getElementById("playerHand").style.display = 'block';
@@ -249,6 +253,6 @@
 
     setTimeout(beginGame, 5000);
   </script>
-  <p>v.a1.a1 alpha</p>
+  <p>v.b1.b1 BETA</p>
 </body>
 </html>
