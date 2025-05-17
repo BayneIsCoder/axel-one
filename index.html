@@ -82,15 +82,6 @@
     let slapTimeout = null;
     let playerCards = [];
     let computerCards = [];
-    let devMode = false;
-
-    function enableDevMode() {
-      devMode = true;
-      console.log('%cDeveloper mode enabled.', 'color: green; font-weight: bold;');
-      computerCards.push(...Array(99).fill('1'));
-      playerCards.push(...Array(99).fill('1'));
-      updatePlayerHand();
-    }
 
     function log(msg) {
       const logBox = document.getElementById("log");
@@ -99,7 +90,6 @@
     }
 
     function validResponses(card) {
-      if (devMode) return ["1","2","3","swap","slap","blank"];
       if (["swap", "slap", "blank"].includes(card)) return ["1", "2", "3", "swap", "slap", "blank"];
       if (card === "1") return ["1", "2", "swap", "slap", "blank"];
       if (card === "2") return ["1", "2", "3", "swap", "slap", "blank"];
@@ -110,10 +100,10 @@
     function getRandomCard() {
       const roll = Math.floor(Math.random() * 12) + 1;
       if (roll <= 3) return '1';
-      if (roll <= 5) return '2';
-      if (roll <= 8) return '3';
-      if (roll === 9) return 'swap';
-      if (roll === 10) return 'slap';
+      if (roll <= 4) return '2';
+      if (roll <= 7) return '3';
+      if (roll === 8) return 'swap';
+      if (roll === 9) return 'slap';
       return 'blank';
     }
 
@@ -246,7 +236,7 @@
       document.getElementById('slapArea').style.display = 'block';
       log('SLAP battle begins! Click SLAP quickly!');
 
-      if (fromComputer && !devMode) {
+      if (fromComputer) {
         slapTimeout = setTimeout(() => handleSlap('axilian'), 1000);
       }
     }
@@ -281,7 +271,6 @@
 
     setTimeout(beginGame, 5000);
   </script>
-  <p>3.2.0</p>
+  <p>3.2.1</p>
 </body>
 </html>
-
