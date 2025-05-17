@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Axel-One: Web Edition</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Ubuntu&display=swap');
+    body {
+      font-family: 'Ubuntu', sans-serif;
+      background: #f0f0f0;
+      text-align: center;
+      padding: 20px;
+      color: #222;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 0.5em;
+    }
+    .cards button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #888;
+      background: white;
+      transition: background-color 0.3s ease;
+      min-width: 60px;
+    }
+    .cards button:hover:not(:disabled) {
+      background-color: #ddd;
+    }
+    #log {
+      margin-top: 30px;
+      max-height: 300px;
+      overflow-y: auto;
+      text-align: left;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      line-height: 1.3;
+      border-radius: 6px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .slap-btn {
+      background-color: #f44336;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      padding: 12px 30px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+      user-select: none;
+    }
+    .slap-btn:hover {
+      background-color: #d32f2f;
+    }
+    .hand {
+      margin: 10px 0 20px 0;
+    }
+    #computerHand span {
+      display: inline-block;
+      margin: 0 4px;
+      padding: 6px 12px;
+      background: #eee;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-weight: 600;
+      font-size: 16px;
+      min-width: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Axel-One: Web Edition</h1>
+  <p><strong>Your Hand:</strong></p>
+  <div class="hand" id="playerHand"></div>
+
+  <p><strong id="computerHandTitle" style="display:none">Computer's Hand:</strong></p>
+  <div class="hand" id="computerHand" style="display:none"></div>
+
+  <div id="slapArea" style="display:none">
+    <button class="slap-btn" onclick="handleSlap('player')">SLAP!</button>
+  </div>
+
+  <div id="log"></div>
+
+  <script>
+    let lastCard = null;
+    let slapTimeout = null;
+    let playerCards = [];
+    let computerCards = [];
+    let slapInProgress = false;
+
+    function log(msg) {
+      const logBox = document.getElementById("log");
+      logBox.innerHTML += `<div>> ${msg}</div>`;
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function validResponses(card) {
+      if (["swap", "slap", "blank"].includes(card)) return ["1", "2", "3", "swap", "slap", "blank"];
+      if (card === "1") return ["1", "2", "swap", "slap", "blank"];
+      if (card === "2") return ["1", "2", "3", "swap", "slap", "blank"];
+      if (card === "3") return ["2", "3", "swap", "slap", "blank"];
+      return ["1", "2", "3", "swap", "slap", "blank"];
+    }
+
+    // Weighted random card draw with fewer 2s and rare specials
+    function getRandomCard() {
+      const weightedCards = [
+        '1','1','1','1','1','1','1','1',   // 8 times '1'
+        '2','2','2','2',                   // 4 times '2'
+        '3','3','3','3','3','3',           // 6 times '3'
+        'swap',                           // 1 time 'swap'
+        'slap',                           // 1 time 'slap'
+        'blank'                           // 1 time 'blank'
+      ];
+      return weightedCards[Math.floor(Math.random() * weightedCards.length)];
+    }
+
+    function drawInitialCards() {
+      for (let i = 0; i < 5; i++) {
+        playerCards.push(getRandomCard());
+        computerCards.push(getRandomCard());
+      }
+      updatePlayerHand();
+    }
+
+    function updatePlayerHand() {
+      const container = document.getElementById("playerHand");
+      container.innerHTML = '';
+      playerCards.forEach((card, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = card;
+        btn.disabled = slapInProgress;
+        btn.onclick = () => playerPlayCard(index);
+        container.appendChild(btn);
+      });
+    }
+
+    function showComputerHand() {
+      const container = document.getElementById("computerHand");
+      const title = document.getElementById("computerHandTitle");
+      container.innerHTML = '';
+      computerCards.forEach(card => {
+        const span = document.createElement("span");
+        span.textContent = card;
+        container.appendChild(span);
+      });
+      container.style.display = 'block';
+      title.style.display = 'block';
+    }
+
+    function checkWinCondition() {
+      if (playerCards.length === 0) {
+        log("You used all your cards. You win! 🎉");
+        setTimeout(() => location.reload(), 2000);
+        return true;
+      }
+      if (computerCards.length === 0) {
+        log("Computer used all their cards. You win! 🎉");
+        showComputerHand();
+        setTimeout(() => location.reload(), 2000);
+        return true;
+      }
+      return false;
+    }
+
+    function swapCards() {
+      const temp = [...playerCards];
+      playerCards = [...computerCards];
+      computerCards = [...temp];
+      log("Cards have been swapped!");
+      updatePlayerHand();
+    }
+
+    function playerPlayCard(index) {
+      if (slapInProgress) {
+        log("You must slap before playing more cards!");
+        return;
+      }
+
+      const card = playerCards[index];
+      if (!validResponses(lastCard).includes(card)) {
+        log(`Invalid move! You can't play ${card} after ${lastCard}`);
+        return;
+      }
+      log(`You played: ${card}`);
+      lastCard = card;
+      playerCards.splice(index, 1);
+      updatePlayerHand();
+
+      if (checkWinCondition()) return;
+
+      if (card === 'slap') {
+        startSlapBattle();
+      } else if (card === 'swap') {
+        swapCards();
+        setTimeout(computerMove, 1000);
+      } else {
+        if (!hasPlayableCard(computerCards)) {
+          log('Computer has no valid cards left. You win! 🎉');
+          showComputerHand();
+          setTimeout(() => location.reload(), 2000);
+          return;
+        }
+        setTimeout(computerMove, 1000);
+      }
+    }
+
+    function computerMove() {
+      if (slapInProgress) return; // Wait for slap resolution
+
+      const valid = validResponses(lastCard);
+      // Find all playable cards
+      const playableCards = computerCards.filter(card => valid.includes(card));
+      if (playableCards.length === 0) {
+        log('Computer has no valid cards left. You win! 🎉');
+        showComputerHand();
+        setTimeout(() => location.reload(), 2000);
+        return;
+      }
+
+      // Choose card with some "intelligence":
+      // - Prioritize numeric cards over specials, except if slap is available sometimes (20% chance)
+      // - If slap is last card, allow ANY card (per rules)
+      // - Try to avoid swap if user has lots of cards
+
+      let card = null;
+
+      // 20% chance computer tries to slap if it has it
+      if (Math.random() < 0.2 && playableCards.includes('slap')) {
+        card = 'slap';
+      } else {
+        // Pick a non-special card if possible
+        const numericCards = playableCards.filter(c => ['1','2','3'].includes(c));
+        if (numericCards.length > 0) {
+          // Pick random numeric card from valid ones
+          card = numericCards[Math.floor(Math.random() * numericCards.length)];
+        } else {
+          // Otherwise pick any playable card
+          card = playableCards[Math.floor(Math.random() * playableCards.length)];
+        }
+      }
+
+      // Remove chosen card from hand
+      const index = computerCards.indexOf(card);
+      computerCards.splice(index, 1);
+      log(`Computer played: ${card}`);
+      lastCard = card;
+
+      if (checkWinCondition()) return;
+
+      if (card === 'slap') {
+        startSlapBattle(true);
+      } else if (card === 'swap') {
+        swapCards();
+        if (!hasPlayableCard(playerCards)) {
+          log('You have no valid cards left. Game over. 💀');
+          setTimeout(() => location.reload(), 2000);
+          return;
+        }
+        setTimeout(() => {
+          if (!hasPlayableCard(playerCards)) {
+            log('You have no valid cards left. Game over. 💀');
+            setTimeout(() => location.reload(), 2000);
+          }
+        }, 1200);
+      } else {
+        if (!hasPlayableCard(playerCards)) {
+          log('You have no valid cards left. Game over. 💀');
+          setTimeout(() => location.reload(), 2000);
+        }
+      }
+      updatePlayerHand();
+    }
+
+    function hasPlayableCard(cards) {
+      const valid = validResponses(lastCard);
+      return cards.some(card => valid.includes(card));
+    }
+
+    function startSlapBattle(fromComputer = false) {
+      slapInProgress = true;
+      document.getElementById('slapArea').style.display = 'block';
+      log('SLAP battle begins! Click SLAP quickly!');
+
+      slapTimeout = setTimeout(() => {
+        if (fromComputer) {
+          handleSlap('computer');
+        } else {
+          // If user doesn't slap within 1 second, computer wins slap
+          handleSlap('computer');
+        }
+      }, 1000);
+
+      updatePlayerHand(); // disable cards while slapping
+    }
+
+    function handleSlap(who) {
+      if (!slapInProgress) return; // Ignore multiple calls
+      slapInProgress = false;
+
+      clearTimeout(slapTimeout);
+      document.getElementById('slapArea').style.display = 'none';
+
+      if (who === 'player') {
+        log('You slapped first! Computer draws a card from the bottom.');
+        computerCards.push(getRandomCard());
+      } else {
+        log('Computer slapped first! You draw a card from the bottom.');
+        playerCards.push(getRandomCard());
+      }
+      updatePlayerHand();
+
+      if (checkWinCondition()) return;
+
+      setTimeout(computerMove, 1000);
+    }
+
+    drawInitialCards();
+  </script>
+</body>
+</html>
