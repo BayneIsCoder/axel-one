@@ -139,18 +139,23 @@
       title.style.display = 'block';
     }
 
+    function endGame(msg) {
+      log(msg);
+      document.body.classList.add('flash-red');
+      document.getElementById("deathSound").play();
+      setTimeout(() => {
+        document.body.innerHTML = '<h1>' + msg + '</h1>';
+      }, 100);
+      setTimeout(() => location.reload(), 5000);
+    }
+
     function checkWinCondition() {
       if (playerCards.length === 0) {
-        log("You used all your cards. You win! 🎉");
-        document.body.innerHTML = '';
-        setTimeout(() => location.reload(), 5000);
+        endGame("You used all your cards. You win! 🎉");
         return true;
       }
       if (computerCards.length === 0) {
-        log("Axilian used all their cards. You win! 🎉");
-        showComputerHand();
-        document.body.innerHTML = '';
-        setTimeout(() => location.reload(), 5000);
+        endGame("Axilian used all their cards. You win! 🎉");
         return true;
       }
       return false;
@@ -192,12 +197,7 @@
       const valid = validResponses(lastCard);
       const playable = computerCards.find(card => valid.includes(card));
       if (!playable) {
-        log('Axilian has no valid cards left. You win! 🎉');
-        showComputerHand();
-        document.body.classList.add('flash-red');
-        document.getElementById("deathSound").play();
-        document.body.innerHTML = '';
-        setTimeout(() => location.reload(), 5000);
+        endGame('Axilian has no valid cards left. You win! 🎉');
         return;
       }
       const index = computerCards.findIndex(c => c === playable);
@@ -211,10 +211,10 @@
         startSlapBattle(true);
       } else if (card === 'swap') {
         swapCards();
-        if (!hasPlayableCard(playerCards)) endGameLoss();
+        if (!hasPlayableCard(playerCards)) endGame('You have no valid cards left. Game over. 💀');
         else document.getElementById("playerHand").style.display = 'block';
       } else {
-        if (!hasPlayableCard(playerCards)) endGameLoss();
+        if (!hasPlayableCard(playerCards)) endGame('You have no valid cards left. Game over. 💀');
         else document.getElementById("playerHand").style.display = 'block';
       }
     }
@@ -222,14 +222,6 @@
     function hasPlayableCard(cards) {
       const valid = validResponses(lastCard);
       return cards.some(card => valid.includes(card));
-    }
-
-    function endGameLoss() {
-      log('You have no valid cards left. Game over. 💀');
-      document.body.classList.add('flash-red');
-      document.getElementById("deathSound").play();
-      document.body.innerHTML = '';
-      setTimeout(() => location.reload(), 5000);
     }
 
     function startSlapBattle(fromComputer = false) {
@@ -271,6 +263,5 @@
 
     setTimeout(beginGame, 5000);
   </script>
-  <p>3.2.2</p>
 </body>
 </html>
