@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Axel-One</title>
   <style>
     body {
@@ -9,6 +9,8 @@
       background: #111;
       color: #0f0;
       padding: 20px;
+      text-align: center;
+      margin: 0;
     }
     button {
       margin: 5px;
@@ -22,13 +24,21 @@
       border: 2px solid #0f0;
       cursor: pointer;
     }
+    #lostScreen {
+      font-size: 50px;
+      color: red;
+      margin-top: 40vh;
+    }
   </style>
 </head>
 <body>
-  <h1>Axel-One: Web Edition</h1>
+  <h1 id="title">Axel-One: Web Edition</h1>
   <p><b>Card on Table:</b> <span id="tableCard">?</span></p>
   <p><b>Your Hand:</b> <span id="userHand"></span></p>
   <p id="gameLog"></p>
+
+  <p id="lostScreen" style="display:none;">you lost💀</p>
+  <audio id="deathSound" src="death.mp3" preload="auto"></audio>
 
   <script>
     const allCards = ["1", "2", "3", "Swap", "Slap", "Blank"];
@@ -45,6 +55,8 @@
     const tableCardSpan = document.getElementById("tableCard");
     const userHandSpan = document.getElementById("userHand");
     const gameLog = document.getElementById("gameLog");
+    const lostScreen = document.getElementById("lostScreen");
+    const deathSound = document.getElementById("deathSound");
 
     function shuffleDeck() {
       const deck = [...allCards, ...allCards, ...allCards];
@@ -65,22 +77,22 @@
 
     function updateUI() {
       tableCardSpan.textContent = tableCard;
-      userHandSpan.innerHTML = '';
+      userHandSpan.innerHTML = "";
 
       if (userTurn) {
         userHand.forEach((card, idx) => {
-          const btn = document.createElement('button');
+          const btn = document.createElement("button");
           btn.textContent = card;
-          btn.className = 'card';
+          btn.className = "card";
           btn.onclick = () => playCard(card, idx);
           if (!validResponses[tableCard].includes(card)) btn.disabled = true;
           userHandSpan.appendChild(btn);
         });
       } else {
         userHand.forEach(() => {
-          const hidden = document.createElement('button');
+          const hidden = document.createElement("button");
           hidden.textContent = "???";
-          hidden.className = 'card';
+          hidden.className = "card";
           hidden.disabled = true;
           userHandSpan.appendChild(hidden);
         });
@@ -123,7 +135,7 @@
     }
 
     function aiTurn() {
-      const possible = aiHand.filter(c => validResponses[tableCard].includes(c));
+      const possible = aiHand.filter((c) => validResponses[tableCard].includes(c));
       if (possible.length === 0) {
         log("Axilian can't play. YOU WIN!");
         disableAll();
@@ -150,16 +162,32 @@
         disableAll();
         return;
       }
-      if (userTurn && !userHand.some(card => validResponses[tableCard].includes(card))) {
-        log("No valid cards to play. YOU LOSE!");
-        disableAll();
+      if (userTurn && !userHand.some((card) => validResponses[tableCard].includes(card))) {
+        loseSequence();
         return;
       }
     }
 
     function disableAll() {
-      const buttons = document.querySelectorAll('.card');
-      buttons.forEach(btn => btn.disabled = true);
+      const buttons = document.querySelectorAll(".card");
+      buttons.forEach((btn) => (btn.disabled = true));
+    }
+
+    function loseSequence() {
+      // Hide everything
+      document.body.innerHTML = "";
+      // Show lost text
+      const lostText = document.createElement("div");
+      lostText.id = "lostScreen";
+      lostText.textContent = "you lost💀";
+      document.body.appendChild(lostText);
+      // Play death sound
+      const sound = document.createElement("audio");
+      sound.src = "death.mp3";
+      sound.autoplay = true;
+      document.body.appendChild(sound);
+      // Refresh page after 5 seconds
+      setTimeout(() => location.reload(), 5000);
     }
 
     function randomCard() {
@@ -168,6 +196,5 @@
 
     drawInitialHands();
   </script>
-  <p>3.2.4</p>
 </body>
 </html>
