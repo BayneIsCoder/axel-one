@@ -2,38 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Axel-One: Web Edition</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Ubuntu&display=swap');
     body {
       font-family: 'Ubuntu', sans-serif;
       background: #f0f0f0;
       text-align: center;
       padding: 20px;
-      color: #222;
     }
-    #gameContainer {
-      display: none;
-    }
-    h1 {
-      color: #333;
-      margin-bottom: 0.5em;
-    }
+    h1 { color: #333; }
     .cards button {
       margin: 5px;
       padding: 10px 20px;
-      font-size: 18px;
+      font-size: 16px;
       cursor: pointer;
-      border-radius: 6px;
-      border: 1px solid #888;
-      background: white;
-      transition: background-color 0.3s ease;
-      min-width: 60px;
     }
-    .cards button:hover:not(:disabled) {
-      background-color: #ddd;
-    }
+    .hand { margin: 10px 0; }
     #log {
       margin-top: 30px;
       max-height: 300px;
@@ -42,75 +27,67 @@
       background: #fff;
       padding: 10px;
       border: 1px solid #ccc;
-      font-size: 14px;
-      line-height: 1.3;
-      border-radius: 6px;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
     }
     .slap-btn {
       background-color: #f44336;
       color: white;
       font-weight: bold;
-      font-size: 20px;
-      padding: 12px 30px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      margin-top: 20px;
-      user-select: none;
     }
-    .slap-btn:hover {
-      background-color: #d32f2f;
+    @keyframes flashRed {
+      0% { opacity: 0; }
+      20% { opacity: 1; }
+      100% { opacity: 0; }
     }
-    .hand {
-      margin: 10px 0 20px 0;
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      color: white;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
     }
-    #computerHand span {
-      display: inline-block;
-      margin: 0 4px;
-      padding: 6px 12px;
-      background: #eee;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-weight: 600;
-      font-size: 16px;
-      min-width: 50px;
-    }
-    #countdown {
-      font-size: 28px;
-      font-weight: bold;
-      margin-top: 200px;
+    #flashOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: red;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9999;
     }
   </style>
 </head>
 <body>
+  <div id="overlay">Matching with a random Axilian... please wait...</div>
 
-  <div id="countdown">Matching with a random Axilian... please wait...</div>
+  <h1>Axel-One: Web Edition</h1>
 
-  <div id="gameContainer">
-    <h1>Axel-One: Web Edition</h1>
-    <p><strong>Your Hand:</strong></p>
-    <div class="hand" id="playerHand"></div>
+  <p><strong>Your Hand:</strong></p>
+  <div class="hand" id="playerHand"></div>
 
-    <p><strong id="computerHandTitle" style="display:none">Axilian's Hand:</strong></p>
-    <div class="hand" id="computerHand" style="display:none"></div>
+  <p><strong id="computerHandTitle" style="display:none">Axilian's Hand:</strong></p>
+  <div class="hand" id="computerHand" style="display:none"></div>
 
-    <div id="slapArea" style="display:none">
-      <button class="slap-btn" onclick="handleSlap('player')">SLAP!</button>
-    </div>
-
-    <div id="log"></div>
+  <div id="slapArea" style="display:none">
+    <button class="slap-btn" onclick="handleSlap('player')">SLAP!</button>
   </div>
+
+  <div id="log"></div>
+
+  <audio id="deathSound" src="death.mp3" preload="auto"></audio>
+  <div id="flashOverlay"></div>
 
   <script>
     let lastCard = null;
     let slapTimeout = null;
     let playerCards = [];
     let computerCards = [];
-    let slapInProgress = false;
     let gameOver = false;
+    let slapInProgress = false;
 
     function log(msg) {
       const logBox = document.getElementById("log");
@@ -127,31 +104,21 @@
     }
 
     function getRandomCard() {
-      const weightedCards = [
-        '1','1','1','1','1','1','1','1',
-        '2','2','2','2',
-        '3','3','3','3','3','3',
-        'swap',
-        'slap',
-        'blank'
-      ];
-      return weightedCards[Math.floor(Math.random() * weightedCards.length)];
+      const roll = Math.random();
+      if (roll < 0.25) return "2"; // 25% chance for 2
+      if (roll < 0.5) return "1"; // 25%
+      if (roll < 0.75) return "3"; // 25%
+      if (roll < 0.85) return "blank"; // 10%
+      if (roll < 0.95) return "swap";  // 10%
+      return "slap";                   // 5%
     }
 
     function drawInitialCards() {
-      playerCards = [];
-      computerCards = [];
       for (let i = 0; i < 5; i++) {
         playerCards.push(getRandomCard());
         computerCards.push(getRandomCard());
       }
       updatePlayerHand();
-      hideComputerHand();
-      lastCard = null;
-      slapInProgress = false;
-      gameOver = false;
-      document.getElementById("log").innerHTML = '';
-      setTimeout(computerMove, 500);
     }
 
     function updatePlayerHand() {
@@ -160,7 +127,6 @@
       playerCards.forEach((card, index) => {
         const btn = document.createElement("button");
         btn.textContent = card;
-        btn.disabled = slapInProgress || gameOver;
         btn.onclick = () => playerPlayCard(index);
         container.appendChild(btn);
       });
@@ -172,48 +138,21 @@
       container.innerHTML = '';
       computerCards.forEach(card => {
         const span = document.createElement("span");
-        span.textContent = card;
+        span.textContent = `[${card}] `;
         container.appendChild(span);
       });
       container.style.display = 'block';
       title.style.display = 'block';
     }
 
-    function hideComputerHand() {
-      document.getElementById("computerHand").style.display = 'none';
-      document.getElementById("computerHandTitle").style.display = 'none';
+    function checkPlayable(cards) {
+      const valid = validResponses(lastCard);
+      return cards.some(card => valid.includes(card));
     }
 
     function clearAllHands() {
-      playerCards = [];
-      computerCards = [];
-      updatePlayerHand();
-      hideComputerHand();
-    }
-
-    function checkWinLoseCondition() {
-      if (playerCards.length === 0) {
-        log("You used all your cards. You win! 🎉");
-        endGame();
-        return true;
-      }
-      if (computerCards.length === 0) {
-        log("Axilian used all their cards. You lose! 💀");
-        endGame();
-        return true;
-      }
-
-      if (!hasPlayableCard(playerCards)) {
-        log("You have no valid cards left to play. You lose! 💀");
-        endGame();
-        return true;
-      }
-      if (!hasPlayableCard(computerCards)) {
-        log("Axilian has no valid cards left to play. You win! 🎉");
-        endGame();
-        return true;
-      }
-      return false;
+      document.getElementById("playerHand").innerHTML = '';
+      document.getElementById("computerHand").innerHTML = '';
     }
 
     function endGame() {
@@ -222,93 +161,83 @@
       clearTimeout(slapTimeout);
       document.getElementById('slapArea').style.display = 'none';
       showComputerHand();
+
+      const flash = document.getElementById("flashOverlay");
+      const deathSound = document.getElementById("deathSound");
+
+      if (playerCards.length === 0) {
+        log("You used all your cards. You win! 🎉");
+      } else if (computerCards.length === 0) {
+        log("Axilian used all their cards. You lose! 💀");
+        deathSound.play();
+        flash.style.animation = "flashRed 1s ease";
+      } else if (!checkPlayable(playerCards)) {
+        log("You have no valid cards left to play. You lose! 💀");
+        deathSound.play();
+        flash.style.animation = "flashRed 1s ease";
+      } else if (!checkPlayable(computerCards)) {
+        log("Axilian has no valid cards left. You win! 🎉");
+      }
+
       clearAllHands();
       setTimeout(() => location.reload(), 5000);
     }
 
-    function validPlay(card) {
-      return validResponses(lastCard).includes(card);
+    function swapCards() {
+      [playerCards, computerCards] = [computerCards, playerCards];
+      log("Cards have been swapped!");
+      updatePlayerHand();
     }
 
     function playerPlayCard(index) {
-      if (slapInProgress || gameOver) {
-        log("You can't play cards right now.");
-        return;
-      }
+      if (gameOver || slapInProgress) return;
       const card = playerCards[index];
-      if (!validPlay(card)) {
+      if (!validResponses(lastCard).includes(card)) {
         log(`Invalid move! You can't play ${card} after ${lastCard}`);
         return;
       }
+
       log(`You played: ${card}`);
       lastCard = card;
       playerCards.splice(index, 1);
       updatePlayerHand();
 
-      if (checkWinLoseCondition()) return;
-
       if (card === 'slap') {
-        startSlapBattle();
+        startSlapBattle(false);
       } else if (card === 'swap') {
         swapCards();
-        setTimeout(computerMove, 1000);
+        setTimeout(() => {
+          if (!checkPlayable(computerCards)) return endGame();
+          computerMove();
+        }, 1000);
       } else {
+        if (playerCards.length === 0) return endGame();
+        if (!checkPlayable(computerCards)) return endGame();
         setTimeout(computerMove, 1000);
       }
-    }
-
-    function swapCards() {
-      const temp = [...playerCards];
-      playerCards = [...computerCards];
-      computerCards = [...temp];
-      log("Cards have been swapped!");
-      updatePlayerHand();
     }
 
     function computerMove() {
-      if (slapInProgress || gameOver) return;
-
+      if (gameOver) return;
       const valid = validResponses(lastCard);
-      const playableCards = computerCards.filter(card => valid.includes(card));
-      if (playableCards.length === 0) {
-        log('Axilian has no valid cards left to play. You win! 🎉');
-        endGame();
-        return;
-      }
+      const playable = computerCards.find(card => valid.includes(card));
+      if (!playable) return endGame();
 
-      let card = null;
-      if (Math.random() < 0.2 && playableCards.includes('slap')) {
-        card = 'slap';
-      } else {
-        const numericCards = playableCards.filter(c => ['1','2','3'].includes(c));
-        if (numericCards.length > 0) {
-          card = numericCards[Math.floor(Math.random() * numericCards.length)];
-        } else {
-          card = playableCards[Math.floor(Math.random() * playableCards.length)];
-        }
-      }
-
-      const index = computerCards.indexOf(card);
-      computerCards.splice(index, 1);
+      const index = computerCards.findIndex(c => c === playable);
+      const card = computerCards.splice(index, 1)[0];
       log(`Axilian played: ${card}`);
       lastCard = card;
-
-      if (checkWinLoseCondition()) return;
 
       if (card === 'slap') {
         startSlapBattle(true);
       } else if (card === 'swap') {
         swapCards();
-        setTimeout(() => {
-          if (checkWinLoseCondition()) return;
-        }, 1200);
+        if (!checkPlayable(playerCards)) return endGame();
+      } else {
+        if (!checkPlayable(playerCards)) return endGame();
       }
-      updatePlayerHand();
-    }
 
-    function hasPlayableCard(cards) {
-      const valid = validResponses(lastCard);
-      return cards.some(card => valid.includes(card));
+      if (computerCards.length === 0) return endGame();
     }
 
     function startSlapBattle(fromComputer = false) {
@@ -319,48 +248,39 @@
       slapTimeout = setTimeout(() => {
         handleSlap('axilian');
       }, 1000);
-
-      updatePlayerHand();
     }
 
     function handleSlap(who) {
       if (!slapInProgress) return;
       slapInProgress = false;
-
       clearTimeout(slapTimeout);
       document.getElementById('slapArea').style.display = 'none';
 
       if (who === 'player') {
-        log('You slapped first! Axilian draws a card from the bottom.');
+        log('You slapped first! Axilian draws a card.');
         computerCards.push(getRandomCard());
       } else {
-        log('Axilian slapped first! You draw a card from the bottom.');
+        log('Axilian slapped first! You draw a card.');
         playerCards.push(getRandomCard());
+        updatePlayerHand();
       }
-      updatePlayerHand();
 
-      if (checkWinLoseCondition()) return;
+      if (!checkPlayable(playerCards) || !checkPlayable(computerCards) || playerCards.length === 0 || computerCards.length === 0) {
+        return endGame();
+      }
 
       setTimeout(computerMove, 1000);
     }
 
-    function startCountdown() {
-      const countdown = document.getElementById("countdown");
-      let time = 5;
-      const interval = setInterval(() => {
-        if (time > 1) {
-          time--;
-        } else {
-          clearInterval(interval);
-          countdown.style.display = "none";
-          document.getElementById("gameContainer").style.display = "block";
-          drawInitialCards();
-        }
-      }, 1000);
-    }
-
-    window.onload = startCountdown;
+    // Start game after 5s
+    window.onload = () => {
+      setTimeout(() => {
+        document.getElementById("overlay").style.display = "none";
+        drawInitialCards();
+        computerMove(); // Axilian goes first
+      }, 5000);
+    };
   </script>
-  <p>1.2.0</p>
+  <p>v. 2.0.0</p>
 </body>
 </html>
