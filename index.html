@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Axel-One: Web Edition BETA</title>
+  <title>Axel-One: Web Edition</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Ubuntu&display=swap');
     body {
@@ -76,6 +76,7 @@
     let slapTimeout = null;
     let playerCards = [];
     let computerCards = [];
+    let lastPlayerCard = null;
 
     function log(msg) {
       const logBox = document.getElementById("log");
@@ -120,19 +121,6 @@
       });
     }
 
-    function showComputerHand() {
-      const container = document.getElementById("computerHand");
-      const title = document.getElementById("computerHandTitle");
-      container.innerHTML = '';
-      computerCards.forEach(card => {
-        const span = document.createElement("span");
-        span.textContent = `[${card}] `;
-        container.appendChild(span);
-      });
-      container.style.display = 'block';
-      title.style.display = 'block';
-    }
-
     function checkWinCondition() {
       if (playerCards.length === 0) {
         document.body.innerHTML = '<h1>You used all your cards. You win! 🎉</h1>';
@@ -140,9 +128,7 @@
         return true;
       }
       if (computerCards.length === 0) {
-        document.body.innerHTML = '<h1>Axilian used all their cards. You Lose!! 💀🚡🪑</h1>';
-        document.body.classList.add('flash-red');
-        document.getElementById("deathSound").play();
+        document.body.innerHTML = '<h1>Axilian used all their cards. You win! 🎉</h1>';
         setTimeout(() => location.reload(), 5000);
         return true;
       }
@@ -163,6 +149,7 @@
         log(`Invalid move! You can't play ${card} after ${lastCard}`);
         return;
       }
+      lastPlayerCard = card;
       log(`You played: ${card}`);
       lastCard = card;
       playerCards.splice(index, 1);
@@ -183,7 +170,8 @@
 
     function computerMove() {
       const valid = validResponses(lastCard);
-      const playable = computerCards.find(card => valid.includes(card));
+      const playable = computerCards.find(card => valid.includes(card) && card !== lastPlayerCard);
+      console.log("Axilian cards:", computerCards);
       if (!playable) {
         document.body.classList.add('flash-red');
         document.getElementById("deathSound").play();
@@ -216,9 +204,9 @@
     }
 
     function endGameLoss() {
-      document.body.innerHTML = '<h1>You have no valid cards left. Game over. 💀</h1>';
       document.body.classList.add('flash-red');
       document.getElementById("deathSound").play();
+      document.body.innerHTML = '<h1>You have no valid cards left. Game over. 💀</h1>';
       setTimeout(() => location.reload(), 5000);
     }
 
@@ -261,6 +249,5 @@
 
     setTimeout(beginGame, 5000);
   </script>
-  <p>v1.0.1 BETA</p>
 </body>
 </html>
