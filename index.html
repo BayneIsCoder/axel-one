@@ -41,7 +41,7 @@
       "Blank": allCards,
     };
 
-    let userHand = [], aiHand = [], tableCard = "";
+    let userHand = [], aiHand = [], tableCard = "", userTurn = true;
     const tableCardSpan = document.getElementById("tableCard");
     const userHandSpan = document.getElementById("userHand");
     const gameLog = document.getElementById("gameLog");
@@ -66,14 +66,25 @@
     function updateUI() {
       tableCardSpan.textContent = tableCard;
       userHandSpan.innerHTML = '';
-      userHand.forEach((card, idx) => {
-        const btn = document.createElement('button');
-        btn.textContent = card;
-        btn.className = 'card';
-        btn.onclick = () => playCard(card, idx);
-        if (!validResponses[tableCard].includes(card)) btn.disabled = true;
-        userHandSpan.appendChild(btn);
-      });
+
+      if (userTurn) {
+        userHand.forEach((card, idx) => {
+          const btn = document.createElement('button');
+          btn.textContent = card;
+          btn.className = 'card';
+          btn.onclick = () => playCard(card, idx);
+          if (!validResponses[tableCard].includes(card)) btn.disabled = true;
+          userHandSpan.appendChild(btn);
+        });
+      } else {
+        userHand.forEach(() => {
+          const hidden = document.createElement('button');
+          hidden.textContent = "???";
+          hidden.className = 'card';
+          hidden.disabled = true;
+          userHandSpan.appendChild(hidden);
+        });
+      }
     }
 
     function log(msg) {
@@ -90,6 +101,8 @@
       log("You played: " + card);
       handleSpecial(card, "user");
       tableCard = card;
+      userTurn = false;
+      updateUI();
       checkWinLose();
       setTimeout(aiTurn, 1000);
     }
@@ -121,6 +134,7 @@
       log("Axilian played: " + card);
       handleSpecial(card, "ai");
       tableCard = card;
+      userTurn = true;
       checkWinLose();
       updateUI();
     }
@@ -136,7 +150,7 @@
         disableAll();
         return;
       }
-      if (!userHand.some(card => validResponses[tableCard].includes(card))) {
+      if (userTurn && !userHand.some(card => validResponses[tableCard].includes(card))) {
         log("No valid cards to play. YOU LOSE!");
         disableAll();
         return;
@@ -154,6 +168,6 @@
 
     drawInitialHands();
   </script>
-  3.2.3
+  <p>3.2.4</p>
 </body>
 </html>
