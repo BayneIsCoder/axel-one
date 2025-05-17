@@ -100,10 +100,10 @@
     function getRandomCard() {
       const roll = Math.floor(Math.random() * 12) + 1;
       if (roll <= 3) return '1';
-      if (roll <= 4) return '2';
-      if (roll <= 7) return '3';
-      if (roll === 8) return 'swap';
-      if (roll === 9) return 'slap';
+      if (roll <= 5) return '2';
+      if (roll <= 8) return '3';
+      if (roll === 9) return 'swap';
+      if (roll === 10) return 'slap';
       return 'blank';
     }
 
@@ -271,6 +271,6 @@
 
     setTimeout(beginGame, 5000);
   </script>
-  <p>3.2.1</p>
+  <p>3.2.2</p>
 </body>
 </html>
