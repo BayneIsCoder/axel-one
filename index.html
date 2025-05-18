@@ -12,6 +12,7 @@
       text-align: center;
       padding: 20px;
       display: none;
+      position: relative;
     }
     h1 { color: #333; }
     .cards { margin: 20px 0; }
@@ -47,7 +48,7 @@
       align-items: center;
       justify-content: center;
       font-size: 24px;
-      z-index: 1000;
+      z-index: 10000;
     }
     .flash-red {
       animation: flash 0.5s;
@@ -56,27 +57,58 @@
       0% { background-color: red; }
       100% { background-color: #f0f0f0; }
     }
+    #countdown {
+      font-size: 24px;
+      font-weight: bold;
+      color: green;
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 10px;
+      z-index: 9999;
+    }
+    .countdown-warning {
+      color: red;
+      animation: flash 0.5s infinite alternate;
+    }
+    .end-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      color: white;
+      font-size: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    .hidden { visibility: hidden; }
   </style>
 </head>
 <body>
   <div id="overlay">Matching with a random Axilian... please wait...</div>
   <h1>Axel-One: Web Edition</h1>
+  <div id="countdown" style="display:none"></div>
   <p><strong>Your Hand:</strong></p>
   <div class="hand" id="playerHand"></div>
-  <p><strong id="computerHandTitle" style="display:none">Axilian's Hand:</strong></p>
-  <div class="hand" id="computerHand" style="display:none"></div>
   <div id="slapArea" style="display:none">
     <button class="slap-btn" onclick="handleSlap('player')">SLAP!</button>
   </div>
   <div id="log"></div>
   <audio id="deathSound" src="death.mp3"></audio>
+  <div id="endScreen" class="end-overlay" style="display:none"></div>
 
   <script>
     let lastCard = null;
     let slapTimeout = null;
     let playerCards = [];
     let computerCards = [];
-    let lastPlayerCard = null;
+    let userTurnTimer = null;
+    const USER_TURN_LIMIT = 10000;
+    let countdownInterval = null;
 
     function log(msg) {
       const logBox = document.getElementById("log");
@@ -84,178 +116,167 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
-    function validResponses(card) {
-      if (["swap", "slap", "blank"].includes(card)) return ["1", "2", "3", "swap", "slap", "blank"];
-      if (card === "1") return ["1", "2", "swap", "slap", "blank"];
-      if (card === "2") return ["1", "2", "3", "swap", "slap", "blank"];
-      if (card === "3") return ["2", "3", "swap", "slap", "blank"];
-      return ["1", "2", "3", "swap", "slap", "blank"];
+    function updateCountdown(secondsLeft) {
+      const countdown = document.getElementById("countdown");
+      countdown.style.display = "block";
+      countdown.textContent = `Time left: ${Math.ceil(secondsLeft / 1000)}s`;
+      countdown.classList.toggle("countdown-warning", secondsLeft <= 3000);
     }
 
-    function getRandomCard() {
-      const roll = Math.floor(Math.random() * 12) + 1;
-      if (roll <= 3) return '1';
-      if (roll <= 5) return '2';
-      if (roll <= 8) return '3';
-      if (roll === 9) return 'swap';
-      if (roll === 10) return 'slap';
-      return 'blank';
+    function startUserTurnTimer() {
+      clearTimeout(userTurnTimer);
+      clearInterval(countdownInterval);
+
+      let timeLeft = USER_TURN_LIMIT;
+      updateCountdown(timeLeft);
+      countdownInterval = setInterval(() => {
+        timeLeft -= 100;
+        updateCountdown(timeLeft);
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+        }
+      }, 100);
+
+      userTurnTimer = setTimeout(() => {
+        log("You took too long to move.");
+        const countdown = document.getElementById("countdown");
+        countdown.textContent = "You took too long!! You died.";
+        countdown.className = "countdown-warning";
+        const deathSound = document.getElementById("deathSound");
+        if (deathSound) deathSound.play();
+        document.body.classList.add('flash-red');
+        setTimeout(() => showEndScreen("You took too long!! You died."), 3000);
+      }, USER_TURN_LIMIT);
     }
 
-    function drawInitialCards() {
-      for (let i = 0; i < 10; i++) {
-        playerCards.push(getRandomCard());
-        computerCards.push(getRandomCard());
+    function handlePlayerMove(card) {
+      clearTimeout(userTurnTimer);
+      clearInterval(countdownInterval);
+      document.getElementById("countdown").style.display = "none";
+
+      const index = playerCards.indexOf(card);
+      if (index !== -1) playerCards.splice(index, 1);
+      lastCard = card;
+      log(`You played ${card}`);
+      renderHands();
+
+      if (card === "Slap") return initiateSlap();
+      if (card === "Swap") return handleSwap("player");
+      if (card === "Blank") {
+        log("Blank card played. No effect.");
+        return setTimeout(() => computerTurn(), 1000);
       }
-      updatePlayerHand();
+
+      setTimeout(() => computerTurn(), 1000);
     }
 
-    function updatePlayerHand() {
-      const container = document.getElementById("playerHand");
-      container.innerHTML = '';
-      playerCards.forEach((card, index) => {
+    function computerTurn() {
+      const playerHandDiv = document.getElementById("playerHand");
+      playerHandDiv.classList.add("hidden");
+
+      if (computerCards.length === 0) return showEndScreen("Axilian ran out of cards. You win!");
+
+      const playable = getPlayableCards(computerCards);
+      const card = playable[Math.floor(Math.random() * playable.length)];
+      const index = computerCards.indexOf(card);
+      if (index !== -1) computerCards.splice(index, 1);
+      lastCard = card;
+      log(`Axilian played ${card}`);
+      renderHands();
+
+      if (card === "Slap") return initiateSlap();
+      if (card === "Swap") return handleSwap("computer");
+      if (card === "Blank") {
+        log("Axilian played a Blank card. No effect.");
+        return setTimeout(() => startUserTurn(), 1000);
+      }
+
+      setTimeout(() => startUserTurn(), 1000);
+    }
+
+    function getPlayableCards(hand) {
+      if (!lastCard || ["Slap", "Swap", "Blank"].includes(lastCard)) return hand;
+      const rules = {
+        "1": ["1", "2", "Slap", "Swap", "Blank"],
+        "2": ["1", "2", "3", "Slap", "Swap", "Blank"],
+        "3": ["2", "3", "Slap", "Swap", "Blank"]
+      };
+      return hand.filter(card => rules[lastCard]?.includes(card) || ["Slap", "Swap", "Blank"].includes(card));
+    }
+
+    function renderHands() {
+      const playerHandDiv = document.getElementById("playerHand");
+      playerHandDiv.innerHTML = "";
+      playerCards.forEach(card => {
         const btn = document.createElement("button");
         btn.textContent = card;
-        btn.onclick = () => playerPlayCard(index);
-        container.appendChild(btn);
+        btn.onclick = () => handlePlayerMove(card);
+        playerHandDiv.appendChild(btn);
       });
     }
 
-    function checkWinCondition() {
-      if (playerCards.length === 0) {
-        document.body.innerHTML = '<h1>You used all your cards. You win! 🎉</h1>';
-        setTimeout(() => location.reload(), 5000);
-        return true;
-      }
-      if (computerCards.length === 0) {
-      const overlay = document.getElementById("overlay");
-      overlay.style.display = 'flex';
-      overlay.innerHTML = '<h1>Axilian used all their cards. You win! 🎉</h1>';
-      const deathSound = document.getElementById("deathSound");
-      if (deathSound) deathSound.play();
-      setTimeout(() => location.reload(), 5000);
-      return true;
+    function startUserTurn() {
+      if (playerCards.length === 0) return showEndScreen("You played all your cards. You win!");
+      document.getElementById("playerHand").classList.remove("hidden");
+      renderHands();
+      startUserTurnTimer();
     }
 
-      return false;
-    }
-
-    function swapCards() {
-      const temp = [...playerCards];
-      playerCards = [...computerCards];
-      computerCards = [...temp];
-      log("Cards have been swapped!");
-      updatePlayerHand();
-    }
-
-    function playerPlayCard(index) {
-      const card = playerCards[index];
-      if (!validResponses(lastCard).includes(card)) {
-        log(`Invalid move! You can't play ${card} after ${lastCard}`);
-        return;
-      }
-      lastPlayerCard = card;
-      log(`You played: ${card}`);
-      lastCard = card;
-      playerCards.splice(index, 1);
-      updatePlayerHand();
-      document.getElementById("playerHand").style.display = 'none';
-
-      if (checkWinCondition()) return;
-
-      if (card === 'slap') {
-        startSlapBattle();
-      } else if (card === 'swap') {
-        swapCards();
-        setTimeout(computerMove, 1000);
+    function handleSwap(by) {
+      if (by === "player") {
+        const temp = [...playerCards];
+        playerCards = [...computerCards];
+        computerCards = temp;
+        log("You swapped hands with the Axilian!");
       } else {
-        setTimeout(computerMove, 1000);
+        const temp = [...computerCards];
+        computerCards = [...playerCards];
+        playerCards = temp;
+        log("Axilian swapped hands with you!");
       }
+      renderHands();
+      setTimeout(() => by === "player" ? computerTurn() : startUserTurn(), 1000);
     }
 
-    function computerMove() {
-      const valid = validResponses(lastCard);
-      const playable = computerCards.find(card => valid.includes(card) && card !== lastPlayerCard);
-      console.log("Axilian cards:", computerCards);
-      if (!playable) {
-        document.body.innerHTML = '<h1>Axilian has no valid cards left. You win! 🎉</h1>';
-        setTimeout(() => location.reload(), 5000);
-        return;
-      }
-      const index = computerCards.findIndex(c => c === playable);
-      const card = computerCards.splice(index, 1)[0];
-      log(`Axilian played: ${card}`);
-      lastCard = card;
-
-      if (checkWinCondition()) return;
-
-      if (card === 'slap') {
-        startSlapBattle(true);
-      } else if (card === 'swap') {
-        swapCards();
-        if (!hasPlayableCard(playerCards)) endGameLoss();
-        else document.getElementById("playerHand").style.display = 'block';
-      } else {
-        if (!hasPlayableCard(playerCards)) endGameLoss();
-        else document.getElementById("playerHand").style.display = 'block';
-      }
-    }
-
-    function hasPlayableCard(cards) {
-      const valid = validResponses(lastCard);
-      return cards.some(card => valid.includes(card));
-    }
-
-    function endGameLoss() {
-      document.getElementById("overlay").style.display = "flex";
-      document.getElementById("overlay").innerHTML = "<h1>You have no valid cards left. Game over. 💀</h1>";
-      document.body.classList.add('flash-red');
-      document.getElementById("deathSound").play();
-      document.body.classList.add('flash-red');
-      setTimeout(() => location.reload(), 5000);
-    }
-
-    function startSlapBattle(fromComputer = false) {
-      document.getElementById('slapArea').style.display = 'block';
-      log('SLAP battle begins! Click SLAP quickly!');
-      document.body.classList.add('flash-red');
-
-      if (fromComputer) {
-        slapTimeout = setTimeout(() => handleSlap('axilian'), 1000);
-      }
+    function initiateSlap() {
+      document.getElementById("slapArea").style.display = "block";
+      slapTimeout = setTimeout(() => handleSlap("computer"), 1000);
     }
 
     function handleSlap(who) {
+      document.getElementById("slapArea").style.display = "none";
       clearTimeout(slapTimeout);
-      document.getElementById('slapArea').style.display = 'none';
-
-      if (who === 'player') {
-        log('You slapped first! Axilian draws a card.');
-        computerCards.push(getRandomCard());
+      if (who === "player") {
+        log("You slapped first! Axilian takes a penalty card.");
+        computerCards.push("1");
       } else {
-        log('Axilian slapped first! You draw a card.');
-        playerCards.push(getRandomCard());
-        document.body.classList.add('flash-red');
+        log("Axilian slapped first! You take a penalty card.");
+        playerCards.push("1");
       }
-      updatePlayerHand();
-      document.getElementById("playerHand").style.display = 'block';
-      setTimeout(computerMove, 1000);
+      renderHands();
+      setTimeout(() => who === "player" ? computerTurn() : startUserTurn(), 1000);
     }
 
-    function beginGame() {
-      document.getElementById("overlay").style.display = 'none';
-      document.body.style.display = 'block';
-      drawInitialCards();
-      const firstTurn = Math.floor(Math.random() * 3) + 1;
-      if (firstTurn <= 2) {
-        setTimeout(computerMove, 1000);
-      } else {
-        document.getElementById("playerHand").style.display = 'block';
-      }
+    function showEndScreen(message) {
+      document.getElementById("endScreen").innerText = message;
+      document.getElementById("endScreen").style.display = "flex";
     }
 
-    setTimeout(beginGame, 5000);
+    function initiateGame() {
+      playerCards = shuffle(["1", "2", "3", "Slap", "Swap", "Blank", "1", "2", "3"]);
+      computerCards = shuffle(["1", "2", "3", "Slap", "Swap", "Blank", "1", "2", "3"]);
+      document.getElementById("overlay").style.display = "none";
+      document.body.style.display = "block";
+      renderHands();
+      log("Matched! You go first.");
+      startUserTurn();
+    }
+
+    function shuffle(arr) {
+      return arr.sort(() => Math.random() - 0.5);
+    }
+
+    setTimeout(() => initiateGame(), 3000);
   </script>
-  <p>v.b2.b2 BETA</p>
 </body>
 </html>
