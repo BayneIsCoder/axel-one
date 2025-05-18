@@ -170,7 +170,7 @@
     }
 
     function computerTurn() {
-      if (computerCards.length === 0) return showEndScreen("Axilian ran out of cards. You win!");
+      if (computerCards.length === 0) return showEndScreen("Axilian ran out of cards. You Died!");
 
       const playable = getPlayableCards(computerCards);
       const card = playable[Math.floor(Math.random() * playable.length)];
