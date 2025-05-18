@@ -85,7 +85,6 @@
       justify-content: center;
       z-index: 99999;
     }
-    .hidden { visibility: hidden; }
   </style>
 </head>
 <body>
@@ -121,6 +120,7 @@
       countdown.style.display = "block";
       countdown.textContent = `Time left: ${Math.ceil(secondsLeft / 1000)}s`;
       countdown.classList.toggle("countdown-warning", secondsLeft <= 3000);
+      document.body.classList.add('flash-red');
     }
 
     function startUserTurnTimer() {
@@ -138,9 +138,8 @@
       }, 100);
 
       userTurnTimer = setTimeout(() => {
-        log("You took too long to move.");
         const countdown = document.getElementById("countdown");
-        countdown.textContent = "You took too long!! You died.";
+        countdown.textContent = "You Are About To Die!";
         countdown.className = "countdown-warning";
         const deathSound = document.getElementById("deathSound");
         if (deathSound) deathSound.play();
@@ -158,6 +157,7 @@
       if (index !== -1) playerCards.splice(index, 1);
       lastCard = card;
       log(`You played ${card}`);
+      document.getElementById("playerHand").style.visibility = "hidden";
       renderHands();
 
       if (card === "Slap") return initiateSlap();
@@ -171,9 +171,6 @@
     }
 
     function computerTurn() {
-      const playerHandDiv = document.getElementById("playerHand");
-      playerHandDiv.classList.add("hidden");
-
       if (computerCards.length === 0) return showEndScreen("Axilian ran out of cards. You win!");
 
       const playable = getPlayableCards(computerCards);
@@ -217,7 +214,9 @@
 
     function startUserTurn() {
       if (playerCards.length === 0) return showEndScreen("You played all your cards. You win!");
-      document.getElementById("playerHand").classList.remove("hidden");
+      const playerHandDiv = document.getElementById("playerHand");
+      playerHandDiv.style.visibility = "visible";
+      playerHandDiv.style.pointerEvents = "auto";
       renderHands();
       startUserTurnTimer();
     }
@@ -233,6 +232,7 @@
         computerCards = [...playerCards];
         playerCards = temp;
         log("Axilian swapped hands with you!");
+        document.body.classList.add('flash-red');
       }
       renderHands();
       setTimeout(() => by === "player" ? computerTurn() : startUserTurn(), 1000);
@@ -252,6 +252,7 @@
       } else {
         log("Axilian slapped first! You take a penalty card.");
         playerCards.push("1");
+        document.body.classList.add('flash-red');
       }
       renderHands();
       setTimeout(() => who === "player" ? computerTurn() : startUserTurn(), 1000);
