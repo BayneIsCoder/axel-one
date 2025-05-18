@@ -85,6 +85,7 @@
       justify-content: center;
       z-index: 99999;
     }
+    .hidden { visibility: hidden; }
   </style>
 </head>
 <body>
@@ -157,7 +158,6 @@
       if (index !== -1) playerCards.splice(index, 1);
       lastCard = card;
       log(`You played ${card}`);
-      document.getElementById("playerHand").style.visibility = "hidden";
       renderHands();
 
       if (card === "Slap") return initiateSlap();
@@ -171,6 +171,9 @@
     }
 
     function computerTurn() {
+      const playerHandDiv = document.getElementById("playerHand");
+      playerHandDiv.classList.add("hidden");
+
       if (computerCards.length === 0) return showEndScreen("Axilian ran out of cards. You win!");
 
       const playable = getPlayableCards(computerCards);
@@ -214,9 +217,7 @@
 
     function startUserTurn() {
       if (playerCards.length === 0) return showEndScreen("You played all your cards. You win!");
-      const playerHandDiv = document.getElementById("playerHand");
-      playerHandDiv.style.visibility = "visible";
-      playerHandDiv.style.pointerEvents = "auto";
+      document.getElementById("playerHand").classList.remove("hidden");
       renderHands();
       startUserTurnTimer();
     }
