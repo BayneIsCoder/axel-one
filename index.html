@@ -120,7 +120,6 @@
       countdown.style.display = "block";
       countdown.textContent = `Time left: ${Math.ceil(secondsLeft / 1000)}s`;
       countdown.classList.toggle("countdown-warning", secondsLeft <= 3000);
-      document.body.classList.add('flash-red');
     }
 
     function startUserTurnTimer() {
