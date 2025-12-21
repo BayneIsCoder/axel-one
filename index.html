@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>axel ONE</title>
+  <title>Axel-One: Web Edition</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Ubuntu&display=swap');
     body {
@@ -81,9 +81,25 @@
       color: white;
       font-size: 32px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 99999;
+      gap: 30px;
+    }
+    .restart-btn {
+      padding: 15px 30px;
+      font-size: 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Ubuntu', sans-serif;
+      transition: background-color 0.3s;
+    }
+    .restart-btn:hover {
+      background-color: #45a049;
     }
     /* Visual feedback for disabled cards */
     .disabled-card {
@@ -95,7 +111,7 @@
 </head>
 <body>
   <div id="overlay">Matching with a random Axilian... please wait...</div>
-  <h1>Axel ONE</h1>
+  <h1>Axel-One: Web Edition</h1>
   <div id="countdown" style="display:none"></div>
   
   <p><strong>Your Hand:</strong></p>
@@ -319,8 +335,12 @@
     }
 
     function showEndScreen(message) {
-      document.getElementById("endScreen").innerText = message;
-      document.getElementById("endScreen").style.display = "flex";
+      const endScreen = document.getElementById("endScreen");
+      endScreen.innerHTML = `
+        <div>${message}</div>
+        <button class="restart-btn" onclick="location.reload()">Play Again</button>
+      `;
+      endScreen.style.display = "flex";
     }
 
     function initiateGame() {
