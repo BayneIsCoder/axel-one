@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Axel ONE</title>
+  <title>Axel-One: Web Edition</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Ubuntu&display=swap');
     body {
@@ -111,7 +111,7 @@
 </head>
 <body>
   <div id="overlay">Matching with a random Axilian... please wait...</div>
-  <h1>Axel ONE</h1>
+  <h1>Axel-One: Web Edition</h1>
   <div id="countdown" style="display:none"></div>
   
   <p><strong>Your Hand:</strong></p>
@@ -200,7 +200,11 @@
     }
 
     function computerTurn() {
-      if (computerCards.length === 0) return showEndScreen("Axilian ran out of cards. You Died!");
+      if (computerCards.length === 0) {
+        const deathSound = document.getElementById("deathSound");
+        if (deathSound) deathSound.play();
+        return showEndScreen("Axilian ran out of cards. You Died!");
+      }
 
       const playable = getPlayableCards(computerCards);
       if (playable.length === 0) {
@@ -287,6 +291,8 @@
       const playableCards = getPlayableCards(playerCards);
       if (playableCards.length === 0) {
         log("You have no valid moves!");
+        const deathSound = document.getElementById("deathSound");
+        if (deathSound) deathSound.play();
         return setTimeout(() => showEndScreen("You're stuck with no playable cards. You Died!"), 1500);
       }
       
