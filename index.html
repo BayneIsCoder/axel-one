@@ -4,125 +4,586 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="icon.png" />
-  <link rel="apple-touch-icon" href="icon.png">
   <title>Axel ONE</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Ubuntu&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
       font-family: 'Ubuntu', sans-serif;
-      background: #f0f0f0;
-      text-align: center;
-      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       display: none;
       position: relative;
+      overflow: hidden;
     }
-    h1 { color: #333; }
-    .cards { margin: 20px 0; }
-    .cards button {
-      margin: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
+    
+    /* Animated background particles */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(2px 2px at 20px 30px, white, transparent),
+        radial-gradient(2px 2px at 40px 70px, white, transparent),
+        radial-gradient(1px 1px at 50px 50px, white, transparent),
+        radial-gradient(1px 1px at 80px 10px, white, transparent),
+        radial-gradient(2px 2px at 130px 80px, white, transparent),
+        radial-gradient(1px 1px at 110px 120px, white, transparent);
+      background-repeat: repeat;
+      background-size: 200px 200px;
+      animation: backgroundScroll 20s linear infinite;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    
+    @keyframes backgroundScroll {
+      from { transform: translateY(0); }
+      to { transform: translateY(200px); }
+    }
+    
+    /* Game container */
+    .game-container {
+      position: relative;
+      z-index: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    h1 { 
+      color: white;
+      font-size: 3em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      margin-bottom: 30px;
+      animation: titleGlow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes titleGlow {
+      from { text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 10px rgba(255,255,255,0.3); }
+      to { text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.6); }
+    }
+    
+    /* Card hand container */
+    .hand-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin: 20px 0;
+      min-width: 600px;
+      animation: slideUp 0.5s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .hand-container p {
+      color: white;
+      font-size: 1.2em;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    
+    /* Card buttons */
+    .hand {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .hand button {
+      background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+      border: none;
+      padding: 15px 25px;
+      font-size: 18px;
+      font-weight: bold;
       cursor: pointer;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      color: #2c3e50;
+      position: relative;
+      overflow: hidden;
     }
+    
+    .hand button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: left 0.5s;
+    }
+    
+    .hand button:hover::before {
+      left: 100%;
+    }
+    
+    .hand button:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+    
+    .hand button:active {
+      transform: translateY(-2px) scale(1.02);
+    }
+    
+    /* Disabled cards */
+    .disabled-card {
+      background: linear-gradient(135deg, #868686 0%, #a8a8a8 100%) !important;
+      cursor: not-allowed !important;
+      opacity: 0.5;
+    }
+    
+    .disabled-card:hover {
+      transform: none !important;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+    }
+    
+    /* Slap button */
+    .slap-btn {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+      color: white !important;
+      font-size: 24px !important;
+      padding: 20px 40px !important;
+      animation: pulse 0.5s infinite alternate;
+    }
+    
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+    
+    /* Log box */
     #log {
       margin-top: 30px;
       max-height: 300px;
       overflow-y: auto;
-      text-align: left;
-      background: #fff;
-      padding: 10px;
-      border: 1px solid #ccc;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      min-width: 500px;
+      animation: slideUp 0.5s ease-out 0.2s both;
     }
-    .slap-btn {
-      background-color: #f44336;
-      color: white;
-      font-weight: bold;
+    
+    #log div {
+      padding: 5px 0;
+      color: #2c3e50;
+      animation: logEntry 0.3s ease-out;
     }
-    .hand { margin: 10px 0; }
+    
+    @keyframes logEntry {
+      from { 
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    /* Overlay */
     #overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 28px;
+      color: white;
       z-index: 10000;
+      animation: overlayPulse 2s ease-in-out infinite;
     }
+    
+    @keyframes overlayPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.95; }
+    }
+    
+    /* Flash animation */
     .flash-red {
-      animation: flash 0.5s;
+      animation: flashDanger 0.5s;
     }
-    @keyframes flash {
-      0% { background-color: red; }
-      100% { background-color: #f0f0f0; }
+    
+    @keyframes flashDanger {
+      0% { 
+        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+      }
+      100% { 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
     }
+    
+    /* Countdown timer */
     #countdown {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: bold;
-      color: green;
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 10px;
+      color: #84fab0;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
       z-index: 9999;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: slideDown 0.5s ease-out;
     }
+    
+    @keyframes slideDown {
+      from { 
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
     .countdown-warning {
-      color: red;
-      animation: flash 0.5s infinite alternate;
+      color: #ff4b2b !important;
+      animation: warningPulse 0.5s infinite alternate;
     }
+    
+    @keyframes warningPulse {
+      from { 
+        transform: scale(1);
+        color: #ff4b2b;
+      }
+      to { 
+        transform: scale(1.1);
+        color: #ff416c;
+      }
+    }
+    
+    /* End screen */
     .end-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: black;
+      background: linear-gradient(135deg, #0f0f0f 0%, #2c3e50 100%);
       color: white;
-      font-size: 32px;
+      font-size: 36px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 99999;
       gap: 30px;
+      animation: fadeIn 0.5s ease-out;
     }
+    
+    /* Death end screen with red tint */
+    .end-overlay.death-screen {
+      background: linear-gradient(135deg, #1a0000 0%, #4a0000 50%, #8b0000 100%);
+      animation: deathScreenFade 0.8s ease-out;
+    }
+    
+    .end-overlay.death-screen .end-message {
+      color: #ff6666;
+      text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+    }
+    
+    .end-overlay.death-screen .restart-btn {
+      background: linear-gradient(135deg, #8b0000 0%, #dc143c 100%);
+    }
+    
+    .end-overlay.death-screen .restart-btn:hover {
+      background: linear-gradient(135deg, #dc143c 0%, #ff0000 100%);
+      box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);
+    }
+    
+    @keyframes deathScreenFade {
+      from { 
+        opacity: 0;
+        background: linear-gradient(135deg, #0f0f0f 0%, #2c3e50 100%);
+      }
+      to { 
+        opacity: 1;
+        background: linear-gradient(135deg, #1a0000 0%, #4a0000 50%, #8b0000 100%);
+      }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .end-message {
+      animation: endMessageZoom 0.8s ease-out;
+    }
+    
+    @keyframes endMessageZoom {
+      from { 
+        transform: scale(0.5);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    /* Restart button */
     .restart-btn {
-      padding: 15px 30px;
+      padding: 15px 40px;
       font-size: 24px;
-      background-color: #4CAF50;
-      color: white;
+      background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+      color: #2c3e50;
       border: none;
-      border-radius: 5px;
+      border-radius: 50px;
       cursor: pointer;
       font-family: 'Ubuntu', sans-serif;
-      transition: background-color 0.3s;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      animation: restartButtonSlide 0.8s ease-out 0.3s both;
     }
+    
+    @keyframes restartButtonSlide {
+      from { 
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
     .restart-btn:hover {
-      background-color: #45a049;
+      transform: translateY(-5px) scale(1.1);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     }
-    /* Visual feedback for disabled cards */
-    .disabled-card {
-      opacity: 0.4;
-      cursor: not-allowed !important;
-      background-color: #ccc !important;
+    
+    .restart-btn:active {
+      transform: translateY(-2px) scale(1.05);
+    }
+    
+    /* Scrollbar styling */
+    #log::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    #log::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+    
+    #log::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+    }
+    
+    #log::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    /* Death distortion effect */
+    .death-distortion {
+      animation: deathDistortion 3s ease-in-out forwards;
+    }
+    
+    @keyframes deathDistortion {
+      0% {
+        filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%) saturate(1);
+        transform: scale(1) rotate(0deg) perspective(1000px) rotateX(0deg) rotateY(0deg);
+      }
+      5% {
+        filter: hue-rotate(-5deg) blur(0.5px) contrast(105%) brightness(105%) saturate(1.1);
+        transform: scale(1.02) rotate(-0.5deg) perspective(1000px) rotateX(1deg) rotateY(-1deg);
+      }
+      10% {
+        filter: hue-rotate(-10deg) blur(1px) contrast(110%) brightness(110%) saturate(1.2);
+        transform: scale(1.04) rotate(-1deg) perspective(1000px) rotateX(-2deg) rotateY(2deg);
+      }
+      15% {
+        filter: hue-rotate(-15deg) blur(1.5px) contrast(115%) brightness(105%) saturate(1.4);
+        transform: scale(1.02) rotate(0.5deg) perspective(1000px) rotateX(1deg) rotateY(-1deg);
+      }
+      20% {
+        filter: hue-rotate(-20deg) blur(2px) contrast(120%) brightness(100%) saturate(1.6);
+        transform: scale(1.00) rotate(1deg) perspective(1000px) rotateX(-1deg) rotateY(1deg);
+      }
+      25% {
+        filter: hue-rotate(-25deg) blur(2.5px) contrast(130%) brightness(95%) saturate(1.8);
+        transform: scale(0.98) rotate(-0.5deg) perspective(1000px) rotateX(2deg) rotateY(-2deg);
+      }
+      30% {
+        filter: hue-rotate(-30deg) blur(3px) contrast(140%) brightness(90%) saturate(2.0);
+        transform: scale(1.01) rotate(-1deg) perspective(1000px) rotateX(-1deg) rotateY(1deg);
+      }
+      35% {
+        filter: hue-rotate(-35deg) blur(3.5px) contrast(150%) brightness(85%) saturate(2.3);
+        transform: scale(1.03) rotate(1.5deg) perspective(1000px) rotateX(1deg) rotateY(-1deg);
+      }
+      40% {
+        filter: hue-rotate(-40deg) blur(4px) contrast(160%) brightness(80%) saturate(2.6);
+        transform: scale(0.99) rotate(0.5deg) perspective(1000px) rotateX(-2deg) rotateY(2deg);
+      }
+      45% {
+        filter: hue-rotate(-45deg) blur(4.5px) contrast(170%) brightness(75%) saturate(2.9);
+        transform: scale(0.97) rotate(-1deg) perspective(1000px) rotateX(1deg) rotateY(-1deg);
+      }
+      50% {
+        filter: hue-rotate(-50deg) blur(5px) contrast(180%) brightness(70%) saturate(3.2);
+        transform: scale(1.00) rotate(-0.5deg) perspective(1000px) rotateX(-1deg) rotateY(0deg);
+      }
+      55% {
+        filter: hue-rotate(-55deg) blur(5.5px) contrast(175%) brightness(65%) saturate(3.5);
+        transform: scale(1.02) rotate(0.5deg) perspective(1000px) rotateX(2deg) rotateY(1deg);
+      }
+      60% {
+        filter: hue-rotate(-60deg) blur(6px) contrast(170%) brightness(60%) saturate(3.8);
+        transform: scale(0.98) rotate(1deg) perspective(1000px) rotateX(-1deg) rotateY(-2deg);
+      }
+      65% {
+        filter: hue-rotate(-65deg) blur(6.5px) contrast(165%) brightness(55%) saturate(4.1);
+        transform: scale(0.99) rotate(-0.3deg) perspective(1000px) rotateX(1deg) rotateY(1deg);
+      }
+      70% {
+        filter: hue-rotate(-70deg) blur(7px) contrast(160%) brightness(50%) saturate(4.4);
+        transform: scale(1.01) rotate(-0.5deg) perspective(1000px) rotateX(-0.5deg) rotateY(-0.5deg);
+      }
+      75% {
+        filter: hue-rotate(-75deg) blur(7.5px) contrast(155%) brightness(45%) saturate(4.7) sepia(0.2);
+        transform: scale(0.97) rotate(0.3deg) perspective(1000px) rotateX(0.5deg) rotateY(0.5deg);
+      }
+      80% {
+        filter: hue-rotate(-80deg) blur(8px) contrast(150%) brightness(40%) saturate(5.0) sepia(0.4);
+        transform: scale(0.99) rotate(0.2deg) perspective(1000px) rotateX(-1deg) rotateY(-0.5deg);
+      }
+      85% {
+        filter: hue-rotate(-85deg) blur(8.5px) contrast(140%) brightness(35%) saturate(5.3) sepia(0.5);
+        transform: scale(0.98) rotate(-0.2deg) perspective(1000px) rotateX(0.5deg) rotateY(0.3deg);
+      }
+      90% {
+        filter: hue-rotate(-90deg) blur(9px) contrast(130%) brightness(32%) saturate(5.6) sepia(0.6);
+        transform: scale(0.96) rotate(0.1deg) perspective(1000px) rotateX(-0.3deg) rotateY(-0.2deg);
+      }
+      95% {
+        filter: hue-rotate(-95deg) blur(9.5px) contrast(120%) brightness(30%) saturate(5.8) sepia(0.7);
+        transform: scale(0.95) rotate(-0.1deg) perspective(1000px) rotateX(0.2deg) rotateY(0.1deg);
+      }
+      100% {
+        filter: hue-rotate(-100deg) blur(10px) contrast(110%) brightness(28%) saturate(6.0) sepia(0.8);
+        transform: scale(0.94) rotate(0deg) perspective(1000px) rotateX(0deg) rotateY(0deg);
+      }
+    }
+    
+    /* Red death overlay */
+    .death-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, 
+        rgba(139, 0, 0, 0.2) 0%,
+        rgba(255, 0, 0, 0.4) 20%,
+        rgba(200, 0, 0, 0.5) 40%,
+        rgba(180, 0, 0, 0.6) 60%,
+        rgba(160, 0, 0, 0.7) 80%,
+        rgba(100, 0, 0, 0.8) 100%);
+      pointer-events: none;
+      z-index: 9998;
+      animation: deathPulse 3s ease-in-out forwards;
+    }
+    
+    @keyframes deathPulse {
+      0% {
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.3;
+      }
+      20% {
+        opacity: 0.5;
+      }
+      30% {
+        opacity: 0.4;
+      }
+      40% {
+        opacity: 0.6;
+      }
+      50% {
+        opacity: 0.5;
+      }
+      60% {
+        opacity: 0.7;
+      }
+      70% {
+        opacity: 0.6;
+      }
+      80% {
+        opacity: 0.8;
+      }
+      90% {
+        opacity: 0.9;
+      }
+      100% {
+        opacity: 1;
+      }
     }
   </style>
 </head>
 <body>
   <div id="overlay">Matching with a random Axilian... please wait...</div>
-  <h1>Axel ONE</h1>
-  <div id="countdown" style="display:none"></div>
   
-  <p><strong>Your Hand:</strong></p>
-  <div class="hand" id="playerHand"></div>
-  <div id="slapArea" style="display:none">
-    <button class="slap-btn" onclick="handleSlap('player')">SLAP!</button>
+  <div class="game-container">
+    <h1>Axel ONE</h1>
+    <div id="countdown" style="display:none"></div>
+    
+    <div class="hand-container">
+      <p>Your Hand:</p>
+      <div class="hand" id="playerHand"></div>
+    </div>
+    
+    <div id="slapArea" style="display:none">
+      <button class="slap-btn" onclick="handleSlap('player')">SLAP!</button>
+    </div>
+    
+    <div id="log"></div>
   </div>
-  <div id="log"></div>
+  
   <audio id="deathSound" src="death.mp3"></audio>
+  <div id="deathOverlay" class="death-overlay" style="display:none"></div>
   <div id="endScreen" class="end-overlay" style="display:none"></div>
 
   <script>
@@ -136,7 +597,8 @@
 
     function log(msg) {
       const logBox = document.getElementById("log");
-      logBox.innerHTML += `<div>> ${msg}</div>`;
+      const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      logBox.innerHTML += `<div>[${timestamp}] ${msg}</div>`;
       logBox.scrollTop = logBox.scrollHeight;
     }
 
@@ -165,9 +627,8 @@
         const countdown = document.getElementById("countdown");
         countdown.textContent = "You Are About To Die!";
         countdown.className = "countdown-warning";
-        const deathSound = document.getElementById("deathSound");
-        if (deathSound) deathSound.play();
         document.body.classList.add('flash-red');
+        applyDeathEffects();
         setTimeout(() => showEndScreen("You took too long!! You died."), 3000);
       }, USER_TURN_LIMIT);
     }
@@ -203,8 +664,6 @@
 
     function computerTurn() {
       if (computerCards.length === 0) {
-        const deathSound = document.getElementById("deathSound");
-        if (deathSound) deathSound.play();
         return showEndScreen("Axilian ran out of cards. You Died!");
       }
 
@@ -293,8 +752,6 @@
       const playableCards = getPlayableCards(playerCards);
       if (playableCards.length === 0) {
         log("You have no valid moves!");
-        const deathSound = document.getElementById("deathSound");
-        if (deathSound) deathSound.play();
         return setTimeout(() => showEndScreen("You're stuck with no playable cards. You Died!"), 1500);
       }
       
@@ -342,10 +799,31 @@
       setTimeout(() => who === "player" ? computerTurn() : startUserTurn(), 1000);
     }
 
+    function applyDeathEffects() {
+      // Play death sound
+      const deathSound = document.getElementById("deathSound");
+      if (deathSound) deathSound.play();
+      
+      // Apply distortion to game container
+      document.querySelector('.game-container').classList.add('death-distortion');
+      // Show red overlay
+      document.getElementById('deathOverlay').style.display = 'block';
+    }
+
     function showEndScreen(message) {
       const endScreen = document.getElementById("endScreen");
+      // Check if this is a death message
+      const isDeath = message.toLowerCase().includes('died') || message.toLowerCase().includes('die');
+      
+      if (isDeath) {
+        applyDeathEffects();
+        endScreen.className = "end-overlay death-screen";
+      } else {
+        endScreen.className = "end-overlay";
+      }
+      
       endScreen.innerHTML = `
-        <div>${message}</div>
+        <div class="end-message">${message}</div>
         <button class="restart-btn" onclick="location.reload()">Play Again</button>
       `;
       endScreen.style.display = "flex";
@@ -357,7 +835,7 @@
       document.getElementById("overlay").style.display = "none";
       document.body.style.display = "block";
       renderHands();
-      log("Matched! You go first.");
+      log("Matched with Axilian! You go first.");
       startUserTurn();
     }
 
