@@ -872,7 +872,7 @@
 
       userTurnTimer = setTimeout(() => {
         const countdown = document.getElementById("countdown");
-        countdown.textContent = "You Are About To Die!";
+        countdown.textContent = "You Took Too Long.";
         countdown.className = "countdown-warning";
         document.body.classList.add('flash-red');
         applyDeathEffects();
