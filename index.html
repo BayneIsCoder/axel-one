@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link rel="icon" type="image/png" href="icon.png" />
   <title>Axel ONE</title>
   <style>
@@ -14,10 +14,17 @@
       box-sizing: border-box;
     }
     
+    html {
+      height: 100%;
+      height: -webkit-fill-available;
+      overflow: hidden;
+    }
+    
     body {
       font-family: 'Ubuntu', sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
+      min-height: -webkit-fill-available;
       display: none;
       position: relative;
       overflow: hidden;
@@ -59,6 +66,11 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      min-height: -webkit-fill-available;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      box-sizing: border-box;
     }
     
     h1 { 
@@ -83,8 +95,10 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       margin: 20px 0;
-      min-width: 600px;
+      width: 90%;
+      max-width: 600px;
       animation: slideUp 0.5s ease-out;
+      box-sizing: border-box;
     }
     
     @keyframes slideUp {
@@ -126,6 +140,10 @@
       color: #2c3e50;
       position: relative;
       overflow: hidden;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      touch-action: manipulation;
     }
     
     .hand button::before {
@@ -157,6 +175,8 @@
       background: linear-gradient(135deg, #868686 0%, #a8a8a8 100%) !important;
       cursor: not-allowed !important;
       opacity: 0.5;
+      pointer-events: none;
+      -webkit-appearance: none;
     }
     
     .disabled-card:hover {
@@ -165,12 +185,30 @@
     }
     
     /* Slap button */
+    #slapArea {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+    }
+    
     .slap-btn {
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
       color: white !important;
       font-size: 24px !important;
       padding: 20px 40px !important;
       animation: pulse 0.5s infinite alternate;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      font-family: 'Ubuntu', sans-serif;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      touch-action: manipulation;
     }
     
     @keyframes pulse {
@@ -188,8 +226,10 @@
       padding: 20px;
       border-radius: 15px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-      min-width: 500px;
+      width: 90%;
+      max-width: 500px;
       animation: slideUp 0.5s ease-out 0.2s both;
+      box-sizing: border-box;
     }
     
     #log div {
@@ -224,6 +264,9 @@
       color: white;
       z-index: 10000;
       animation: overlayPulse 2s ease-in-out infinite;
+      padding: 20px;
+      text-align: center;
+      box-sizing: border-box;
     }
     
     @keyframes overlayPulse {
@@ -307,6 +350,9 @@
       z-index: 99999;
       gap: 30px;
       animation: fadeIn 0.5s ease-out;
+      padding: 20px;
+      text-align: center;
+      box-sizing: border-box;
     }
     
     /* Death end screen with red tint */
@@ -374,6 +420,10 @@
       transition: all 0.3s ease;
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       animation: restartButtonSlide 0.8s ease-out 0.3s both;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      touch-action: manipulation;
     }
     
     @keyframes restartButtonSlide {
@@ -413,6 +463,204 @@
     
     #log::-webkit-scrollbar-thumb:hover {
       background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .game-container {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 2em;
+        margin-bottom: 20px;
+      }
+      
+      .hand-container {
+        min-width: unset;
+        width: 95%;
+        padding: 20px 15px;
+        margin: 15px 0;
+      }
+      
+      .hand-container p {
+        font-size: 1em;
+      }
+      
+      .hand {
+        gap: 10px;
+      }
+      
+      .hand button {
+        padding: 12px 20px;
+        font-size: 16px;
+        min-width: 70px;
+      }
+      
+      #log {
+        min-width: unset;
+        width: 95%;
+        max-height: 200px;
+        padding: 15px;
+        font-size: 14px;
+        margin-top: 20px;
+      }
+      
+      #countdown {
+        font-size: 20px;
+        padding: 10px 15px;
+        top: 10px;
+        right: 10px;
+      }
+      
+      .slap-btn {
+        font-size: 20px !important;
+        padding: 18px 35px !important;
+        width: 200px;
+      }
+      
+      #overlay {
+        font-size: 20px;
+        padding: 20px;
+        text-align: center;
+      }
+      
+      .end-overlay {
+        font-size: 24px;
+        padding: 20px;
+      }
+      
+      .end-message {
+        text-align: center;
+      }
+      
+      .restart-btn {
+        font-size: 20px;
+        padding: 12px 30px;
+        width: 180px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+      }
+      
+      .hand-container {
+        padding: 15px 10px;
+      }
+      
+      .hand button {
+        padding: 10px 15px;
+        font-size: 14px;
+        min-width: 60px;
+      }
+      
+      #log {
+        max-height: 150px;
+        padding: 10px;
+        font-size: 12px;
+      }
+      
+      #countdown {
+        font-size: 16px;
+        padding: 8px 12px;
+        top: 5px;
+        right: 5px;
+      }
+      
+      .slap-btn {
+        font-size: 18px !important;
+        padding: 15px 30px !important;
+        width: 180px;
+      }
+      
+      .end-overlay {
+        font-size: 20px;
+      }
+      
+      .restart-btn {
+        font-size: 18px;
+        padding: 10px 25px;
+        width: 160px;
+      }
+    }
+    
+    @media (max-width: 380px) {
+      h1 {
+        font-size: 1.3em;
+      }
+      
+      .hand button {
+        padding: 8px 12px;
+        font-size: 13px;
+        min-width: 55px;
+      }
+      
+      #log {
+        max-height: 120px;
+        font-size: 11px;
+      }
+      
+      #countdown {
+        font-size: 14px;
+        padding: 6px 10px;
+      }
+    }
+    
+    /* Touch-friendly hover states for mobile */
+    @media (hover: none) and (pointer: coarse) {
+      .hand button:active {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      }
+      
+      .restart-btn:active {
+        transform: translateY(-2px) scale(1.05);
+      }
+      
+      .slap-btn:active {
+        transform: scale(1.15);
+      }
+    }
+    
+    /* Prevent text selection on mobile */
+    @media (hover: none) {
+      * {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      button {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+      }
+    }
+    
+    /* Landscape orientation adjustments */
+    @media (max-height: 500px) and (orientation: landscape) {
+      h1 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+      }
+      
+      .hand-container {
+        padding: 10px 15px;
+        margin: 10px 0;
+      }
+      
+      #log {
+        max-height: 100px;
+      }
+      
+      .end-overlay {
+        padding: 10px;
+      }
     }
     
     /* Death distortion effect */
@@ -582,7 +830,6 @@
     <div id="log"></div>
   </div>
   
-  <audio id="deathSound" src="death.mp3"></audio>
   <div id="deathOverlay" class="death-overlay" style="display:none"></div>
   <div id="endScreen" class="end-overlay" style="display:none"></div>
 
@@ -800,10 +1047,6 @@
     }
 
     function applyDeathEffects() {
-      // Play death sound
-      const deathSound = document.getElementById("deathSound");
-      if (deathSound) deathSound.play();
-      
       // Apply distortion to game container
       document.querySelector('.game-container').classList.add('death-distortion');
       // Show red overlay
@@ -830,6 +1073,14 @@
     }
 
     function initiateGame() {
+      // Prevent double tap zoom on mobile
+      document.addEventListener('touchstart', function(e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      });
+      
+      // Set up game
       playerCards = shuffle(["1", "2", "3", "Slap", "Swap", "Blank", "1", "2", "3"]);
       computerCards = shuffle(["1", "2", "3", "Slap", "Swap", "Blank", "1", "2", "3"]);
       document.getElementById("overlay").style.display = "none";
