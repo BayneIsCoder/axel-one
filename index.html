@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link rel="icon" type="image/png" href="icon.png" />
-  <link rel="apple-touch-icon" href="icon.png">
   <title>Axel ONE</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap');
@@ -359,16 +358,38 @@
     /* Death end screen with red tint */
     .end-overlay.death-screen {
       background: linear-gradient(135deg, #1a0000 0%, #4a0000 50%, #8b0000 100%);
-      animation: deathScreenFade 0.8s ease-out;
+      animation: deathScreenFadeFromBlack 1.5s ease-out;
     }
     
     .end-overlay.death-screen .end-message {
       color: #ff6666;
       text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+      animation: messageGlow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes messageGlow {
+      from {
+        text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+      }
+      to {
+        text-shadow: 0 0 30px rgba(255, 100, 100, 1);
+      }
     }
     
     .end-overlay.death-screen .restart-btn {
       background: linear-gradient(135deg, #8b0000 0%, #dc143c 100%);
+      animation: buttonFadeIn 1s ease-out 0.5s both;
+    }
+    
+    @keyframes buttonFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     .end-overlay.death-screen .restart-btn:hover {
@@ -376,12 +397,20 @@
       box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);
     }
     
-    @keyframes deathScreenFade {
-      from { 
+    @keyframes deathScreenFadeFromBlack {
+      0% { 
         opacity: 0;
-        background: linear-gradient(135deg, #0f0f0f 0%, #2c3e50 100%);
+        background: linear-gradient(135deg, #000000 0%, #000000 100%);
       }
-      to { 
+      30% {
+        opacity: 0.7;
+        background: linear-gradient(135deg, #0a0000 0%, #1a0000 100%);
+      }
+      60% {
+        opacity: 0.9;
+        background: linear-gradient(135deg, #1a0000 0%, #3a0000 50%, #6a0000 100%);
+      }
+      100% { 
         opacity: 1;
         background: linear-gradient(135deg, #1a0000 0%, #4a0000 50%, #8b0000 100%);
       }
@@ -393,17 +422,24 @@
     }
     
     .end-message {
-      animation: endMessageZoom 0.8s ease-out;
+      animation: endMessageFadeIn 1.2s ease-out;
     }
     
-    @keyframes endMessageZoom {
-      from { 
-        transform: scale(0.5);
+    @keyframes endMessageFadeIn {
+      0% { 
+        transform: scale(0.8);
         opacity: 0;
+        filter: blur(10px);
       }
-      to {
+      50% {
+        transform: scale(1.05);
+        opacity: 0.5;
+        filter: blur(5px);
+      }
+      100% {
         transform: scale(1);
         opacity: 1;
+        filter: blur(0px);
       }
     }
     
@@ -666,93 +702,93 @@
     
     /* Death distortion effect */
     .death-distortion {
-      animation: deathDistortion 3s ease-in-out forwards;
+      animation: deathDistortion 4s ease-in-out forwards;
     }
     
     @keyframes deathDistortion {
       0% {
         filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%) saturate(1);
-        transform: scale(1) rotate(0deg) perspective(1000px) rotateX(0deg) rotateY(0deg);
+        transform: scale(1) rotate(0deg) perspective(500px) rotateX(0deg) rotateY(0deg);
       }
       5% {
-        filter: hue-rotate(-5deg) blur(0.5px) contrast(105%) brightness(105%) saturate(1.1);
-        transform: scale(1.02) rotate(-0.5deg) perspective(1000px) rotateX(1deg) rotateY(-1deg);
+        filter: hue-rotate(-10deg) blur(1px) contrast(110%) brightness(110%) saturate(1.3);
+        transform: scale(1.05) rotate(-2deg) perspective(500px) rotateX(3deg) rotateY(-3deg);
       }
       10% {
-        filter: hue-rotate(-10deg) blur(1px) contrast(110%) brightness(110%) saturate(1.2);
-        transform: scale(1.04) rotate(-1deg) perspective(1000px) rotateX(-2deg) rotateY(2deg);
+        filter: hue-rotate(-20deg) blur(2px) contrast(120%) brightness(120%) saturate(1.6);
+        transform: scale(1.08) rotate(-4deg) perspective(500px) rotateX(-5deg) rotateY(5deg);
       }
       15% {
-        filter: hue-rotate(-15deg) blur(1.5px) contrast(115%) brightness(105%) saturate(1.4);
-        transform: scale(1.02) rotate(0.5deg) perspective(1000px) rotateX(1deg) rotateY(-1deg);
+        filter: hue-rotate(-30deg) blur(3px) contrast(130%) brightness(115%) saturate(2.0);
+        transform: scale(1.04) rotate(3deg) perspective(500px) rotateX(4deg) rotateY(-4deg);
       }
       20% {
-        filter: hue-rotate(-20deg) blur(2px) contrast(120%) brightness(100%) saturate(1.6);
-        transform: scale(1.00) rotate(1deg) perspective(1000px) rotateX(-1deg) rotateY(1deg);
+        filter: hue-rotate(-40deg) blur(4px) contrast(140%) brightness(110%) saturate(2.5);
+        transform: scale(0.96) rotate(5deg) perspective(500px) rotateX(-6deg) rotateY(6deg);
       }
       25% {
-        filter: hue-rotate(-25deg) blur(2.5px) contrast(130%) brightness(95%) saturate(1.8);
-        transform: scale(0.98) rotate(-0.5deg) perspective(1000px) rotateX(2deg) rotateY(-2deg);
+        filter: hue-rotate(-50deg) blur(5px) contrast(160%) brightness(105%) saturate(3.0);
+        transform: scale(0.92) rotate(-3deg) perspective(500px) rotateX(8deg) rotateY(-8deg);
       }
       30% {
-        filter: hue-rotate(-30deg) blur(3px) contrast(140%) brightness(90%) saturate(2.0);
-        transform: scale(1.01) rotate(-1deg) perspective(1000px) rotateX(-1deg) rotateY(1deg);
+        filter: hue-rotate(-60deg) blur(6px) contrast(180%) brightness(100%) saturate(3.5);
+        transform: scale(1.06) rotate(-6deg) perspective(500px) rotateX(-7deg) rotateY(7deg);
       }
       35% {
-        filter: hue-rotate(-35deg) blur(3.5px) contrast(150%) brightness(85%) saturate(2.3);
-        transform: scale(1.03) rotate(1.5deg) perspective(1000px) rotateX(1deg) rotateY(-1deg);
+        filter: hue-rotate(-70deg) blur(8px) contrast(200%) brightness(95%) saturate(4.0);
+        transform: scale(1.10) rotate(7deg) perspective(500px) rotateX(5deg) rotateY(-5deg);
       }
       40% {
-        filter: hue-rotate(-40deg) blur(4px) contrast(160%) brightness(80%) saturate(2.6);
-        transform: scale(0.99) rotate(0.5deg) perspective(1000px) rotateX(-2deg) rotateY(2deg);
+        filter: hue-rotate(-80deg) blur(10px) contrast(220%) brightness(90%) saturate(4.5);
+        transform: scale(0.94) rotate(4deg) perspective(500px) rotateX(-9deg) rotateY(9deg);
       }
       45% {
-        filter: hue-rotate(-45deg) blur(4.5px) contrast(170%) brightness(75%) saturate(2.9);
-        transform: scale(0.97) rotate(-1deg) perspective(1000px) rotateX(1deg) rotateY(-1deg);
+        filter: hue-rotate(-90deg) blur(12px) contrast(240%) brightness(85%) saturate(5.0);
+        transform: scale(0.88) rotate(-8deg) perspective(500px) rotateX(6deg) rotateY(-6deg);
       }
       50% {
-        filter: hue-rotate(-50deg) blur(5px) contrast(180%) brightness(70%) saturate(3.2);
-        transform: scale(1.00) rotate(-0.5deg) perspective(1000px) rotateX(-1deg) rotateY(0deg);
+        filter: hue-rotate(-100deg) blur(14px) contrast(260%) brightness(80%) saturate(5.5);
+        transform: scale(1.12) rotate(-5deg) perspective(500px) rotateX(-10deg) rotateY(4deg);
       }
       55% {
-        filter: hue-rotate(-55deg) blur(5.5px) contrast(175%) brightness(65%) saturate(3.5);
-        transform: scale(1.02) rotate(0.5deg) perspective(1000px) rotateX(2deg) rotateY(1deg);
+        filter: hue-rotate(-110deg) blur(16px) contrast(280%) brightness(75%) saturate(6.0);
+        transform: scale(1.15) rotate(6deg) perspective(500px) rotateX(11deg) rotateY(8deg);
       }
       60% {
-        filter: hue-rotate(-60deg) blur(6px) contrast(170%) brightness(60%) saturate(3.8);
-        transform: scale(0.98) rotate(1deg) perspective(1000px) rotateX(-1deg) rotateY(-2deg);
+        filter: hue-rotate(-120deg) blur(18px) contrast(300%) brightness(70%) saturate(6.5);
+        transform: scale(0.90) rotate(9deg) perspective(500px) rotateX(-8deg) rotateY(-10deg);
       }
       65% {
-        filter: hue-rotate(-65deg) blur(6.5px) contrast(165%) brightness(55%) saturate(4.1);
-        transform: scale(0.99) rotate(-0.3deg) perspective(1000px) rotateX(1deg) rotateY(1deg);
+        filter: hue-rotate(-130deg) blur(20px) contrast(280%) brightness(65%) saturate(7.0);
+        transform: scale(0.86) rotate(-4deg) perspective(500px) rotateX(7deg) rotateY(7deg);
       }
       70% {
-        filter: hue-rotate(-70deg) blur(7px) contrast(160%) brightness(50%) saturate(4.4);
-        transform: scale(1.01) rotate(-0.5deg) perspective(1000px) rotateX(-0.5deg) rotateY(-0.5deg);
+        filter: hue-rotate(-140deg) blur(22px) contrast(260%) brightness(60%) saturate(7.5) sepia(0.3);
+        transform: scale(1.08) rotate(-7deg) perspective(500px) rotateX(-5deg) rotateY(-5deg);
       }
       75% {
-        filter: hue-rotate(-75deg) blur(7.5px) contrast(155%) brightness(45%) saturate(4.7) sepia(0.2);
-        transform: scale(0.97) rotate(0.3deg) perspective(1000px) rotateX(0.5deg) rotateY(0.5deg);
+        filter: hue-rotate(-150deg) blur(24px) contrast(240%) brightness(55%) saturate(8.0) sepia(0.5);
+        transform: scale(0.92) rotate(5deg) perspective(500px) rotateX(4deg) rotateY(4deg);
       }
       80% {
-        filter: hue-rotate(-80deg) blur(8px) contrast(150%) brightness(40%) saturate(5.0) sepia(0.4);
-        transform: scale(0.99) rotate(0.2deg) perspective(1000px) rotateX(-1deg) rotateY(-0.5deg);
+        filter: hue-rotate(-160deg) blur(26px) contrast(220%) brightness(50%) saturate(8.5) sepia(0.6);
+        transform: scale(1.05) rotate(3deg) perspective(500px) rotateX(-6deg) rotateY(-3deg);
       }
       85% {
-        filter: hue-rotate(-85deg) blur(8.5px) contrast(140%) brightness(35%) saturate(5.3) sepia(0.5);
-        transform: scale(0.98) rotate(-0.2deg) perspective(1000px) rotateX(0.5deg) rotateY(0.3deg);
+        filter: hue-rotate(-170deg) blur(28px) contrast(200%) brightness(45%) saturate(9.0) sepia(0.7);
+        transform: scale(0.88) rotate(-2deg) perspective(500px) rotateX(3deg) rotateY(2deg);
       }
       90% {
-        filter: hue-rotate(-90deg) blur(9px) contrast(130%) brightness(32%) saturate(5.6) sepia(0.6);
-        transform: scale(0.96) rotate(0.1deg) perspective(1000px) rotateX(-0.3deg) rotateY(-0.2deg);
+        filter: hue-rotate(-180deg) blur(30px) contrast(180%) brightness(30%) saturate(9.5) sepia(0.8);
+        transform: scale(0.94) rotate(1deg) perspective(500px) rotateX(-2deg) rotateY(-1deg);
       }
       95% {
-        filter: hue-rotate(-95deg) blur(9.5px) contrast(120%) brightness(30%) saturate(5.8) sepia(0.7);
-        transform: scale(0.95) rotate(-0.1deg) perspective(1000px) rotateX(0.2deg) rotateY(0.1deg);
+        filter: hue-rotate(-190deg) blur(32px) contrast(160%) brightness(15%) saturate(10) sepia(0.9);
+        transform: scale(0.91) rotate(-1deg) perspective(500px) rotateX(1deg) rotateY(1deg);
       }
       100% {
-        filter: hue-rotate(-100deg) blur(10px) contrast(110%) brightness(28%) saturate(6.0) sepia(0.8);
-        transform: scale(0.94) rotate(0deg) perspective(1000px) rotateX(0deg) rotateY(0deg);
+        filter: hue-rotate(-200deg) blur(35px) contrast(150%) brightness(5%) saturate(10) sepia(1.0);
+        transform: scale(0.85) rotate(0deg) perspective(500px) rotateX(0deg) rotateY(0deg);
       }
     }
     
@@ -763,48 +799,72 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to bottom, 
-        rgba(139, 0, 0, 0.2) 0%,
-        rgba(255, 0, 0, 0.4) 20%,
-        rgba(200, 0, 0, 0.5) 40%,
-        rgba(180, 0, 0, 0.6) 60%,
-        rgba(160, 0, 0, 0.7) 80%,
-        rgba(100, 0, 0, 0.8) 100%);
+      background: radial-gradient(ellipse at center, 
+        rgba(139, 0, 0, 0.3) 0%,
+        rgba(80, 0, 0, 0.6) 40%,
+        rgba(40, 0, 0, 0.8) 70%,
+        rgba(0, 0, 0, 0.95) 100%);
       pointer-events: none;
       z-index: 9998;
-      animation: deathPulse 3s ease-in-out forwards;
+      animation: deathFadeToBlack 3s ease-in-out forwards;
     }
     
-    @keyframes deathPulse {
+    @keyframes deathFadeToBlack {
       0% {
         opacity: 0;
-      }
-      10% {
-        opacity: 0.3;
+        background: radial-gradient(ellipse at center, 
+          rgba(139, 0, 0, 0.3) 0%,
+          rgba(80, 0, 0, 0.6) 40%,
+          rgba(40, 0, 0, 0.8) 70%,
+          rgba(0, 0, 0, 0.95) 100%);
       }
       20% {
-        opacity: 0.5;
-      }
-      30% {
         opacity: 0.4;
       }
       40% {
         opacity: 0.6;
       }
-      50% {
-        opacity: 0.5;
-      }
       60% {
-        opacity: 0.7;
-      }
-      70% {
-        opacity: 0.6;
-      }
-      80% {
         opacity: 0.8;
       }
-      90% {
+      80% {
         opacity: 0.9;
+        background: radial-gradient(ellipse at center, 
+          rgba(80, 0, 0, 0.4) 0%,
+          rgba(40, 0, 0, 0.6) 30%,
+          rgba(20, 0, 0, 0.8) 60%,
+          rgba(0, 0, 0, 0.98) 100%);
+      }
+      90% {
+        opacity: 0.95;
+      }
+      100% {
+        opacity: 1;
+        background: radial-gradient(ellipse at center, 
+          rgba(40, 0, 0, 0.2) 0%,
+          rgba(20, 0, 0, 0.5) 20%,
+          rgba(10, 0, 0, 0.8) 40%,
+          rgba(0, 0, 0, 1) 70%);
+      }
+    }
+    
+    /* Black transition overlay */
+    .black-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000;
+      z-index: 99998;
+      opacity: 0;
+      animation: fadeToBlack 1s ease-in 3s forwards;
+      pointer-events: none;
+    }
+    
+    @keyframes fadeToBlack {
+      0% {
+        opacity: 0;
       }
       100% {
         opacity: 1;
@@ -832,6 +892,7 @@
   </div>
   
   <div id="deathOverlay" class="death-overlay" style="display:none"></div>
+  <div id="blackTransition" class="black-transition" style="display:none"></div>
   <div id="endScreen" class="end-overlay" style="display:none"></div>
 
   <script>
@@ -873,11 +934,11 @@
 
       userTurnTimer = setTimeout(() => {
         const countdown = document.getElementById("countdown");
-        countdown.textContent = "You Took Too Long.";
+        countdown.textContent = "You Are About To Die!";
         countdown.className = "countdown-warning";
         document.body.classList.add('flash-red');
         applyDeathEffects();
-        setTimeout(() => showEndScreen("You took too long!! You died."), 3000);
+        setTimeout(() => showEndScreen("You took too long!! You died."), 4000);
       }, USER_TURN_LIMIT);
     }
 
@@ -912,7 +973,8 @@
 
     function computerTurn() {
       if (computerCards.length === 0) {
-        return showEndScreen("Axilian ran out of cards. You Died!");
+        applyDeathEffects();
+        return setTimeout(() => showEndScreen("Axilian ran out of cards. You Died!"), 4000);
       }
 
       const playable = getPlayableCards(computerCards);
@@ -1000,7 +1062,8 @@
       const playableCards = getPlayableCards(playerCards);
       if (playableCards.length === 0) {
         log("You have no valid moves!");
-        return setTimeout(() => showEndScreen("You're stuck with no playable cards. You Died!"), 1500);
+        applyDeathEffects();
+        return setTimeout(() => showEndScreen("You're stuck with no playable cards. You Died!"), 4000);
       }
       
       const playerHandDiv = document.getElementById("playerHand");
@@ -1047,11 +1110,31 @@
       setTimeout(() => who === "player" ? computerTurn() : startUserTurn(), 1000);
     }
 
+    let deathEffectsApplied = false;
+    
     function applyDeathEffects() {
+      // Check if effects already applied
+      if (deathEffectsApplied) return;
+      deathEffectsApplied = true;
+      
+      // Clear any active timers
+      clearTimeout(userTurnTimer);
+      clearInterval(countdownInterval);
+      clearTimeout(slapTimeout);
+      
+      // Hide countdown if visible
+      document.getElementById("countdown").style.display = "none";
+      
+      // Disable all user interactions
+      document.getElementById("playerHand").style.pointerEvents = "none";
+      document.getElementById("slapArea").style.display = "none";
+      
       // Apply distortion to game container
       document.querySelector('.game-container').classList.add('death-distortion');
       // Show red overlay
       document.getElementById('deathOverlay').style.display = 'block';
+      // Show black transition overlay for smooth fade
+      document.getElementById('blackTransition').style.display = 'block';
     }
 
     function showEndScreen(message) {
@@ -1060,7 +1143,6 @@
       const isDeath = message.toLowerCase().includes('died') || message.toLowerCase().includes('die');
       
       if (isDeath) {
-        applyDeathEffects();
         endScreen.className = "end-overlay death-screen";
       } else {
         endScreen.className = "end-overlay";
